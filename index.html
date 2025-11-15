@@ -488,9 +488,11 @@
 </div>
 
 <script>
-    // ==================== WORD DATABASE ====================
-    const WORDS = "word_db.json"
-
+    // ==================== LOAD WORD DATABASE AT START ====================
+    async function loadWords() {
+        const response = await fetch('word_db.json');
+        WORDS = await response.json();
+    };
     // ==================== GAME STATE ====================
     let gameState = {
         playerName: '',
