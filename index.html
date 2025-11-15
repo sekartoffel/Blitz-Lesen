@@ -396,6 +396,8 @@
         }
     }
 </style>
+// ==================== LOAD WORD DATABASE AT START ====================
+<script src="word_db.js"></script>
 
 </head>
 <body>
@@ -488,11 +490,8 @@
 </div>
 
 <script>
-    // ==================== LOAD WORD DATABASE AT START ====================
-    async function loadWords() {
-        const response = await fetch('word_db.json');
-        WORDS = await response.json();
-    };
+   
+
     // ==================== GAME STATE ====================
     let gameState = {
         playerName: '',
