@@ -1,7 +1,7 @@
 // Blitz Lesen - Wörter-Datenbank
 // 400 deutsche Wörter sortiert nach Silbenanzahl
 
-const WORDS = {
+const WORD_DATABASE = {
   "1": [
     // Tiere
     'Hund', 'Kuh', 'Pferd', 'Fuchs', 'Hai', 'Wal', 'Wurm', 'Fisch', 'Huhn', 'Maus',
