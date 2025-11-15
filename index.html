@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blitz Lesen</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+```
+    body {
+        font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .container {
+        background: white;
+        border-radius: 30px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        max-width: 800px;
+        width: 100%;
+        padding: 40px;
+        animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    h1 {
+        text-align: center;
+        color: #667eea;
+        font-size: 3em;
+        margin-bottom: 30px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .screen {
+        display: none;
+    }
+
+    .screen.active {
+        display: block;
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    /* Start Screen */
+    .input-group {
+        margin-bottom: 25px;
+    }
+
+    label {
+        display: block;
+        font-size: 1.3em;
+        color: #333;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+
+    input[type="text"] {
+        width: 100%;
+        padding: 15px;
+        font-size: 1.2em;
+        border: 3px solid #667eea;
+        border-radius: 15px;
+        outline: none;
+        transition: all 0.3s;
+    }
+
+    input[type="text"]:focus {
+        border-color: #764ba2;
+        box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+    }
+
+    .syllable-buttons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-top: 10px;
+    }
+
+    .syllable-btn {
+        padding: 20px;
+        font-size: 1.5em;
+        font-weight: bold;
+        border: 3px solid #ddd;
+        background: white;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .syllable-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .syllable-btn.selected {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 20px;
+        font-size: 1.5em;
+        font-weight: bold;
+        border: none;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 20px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Game Screen */
+    .game-header {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 15px;
+    }
+
+    .progress {
+        font-size: 1.3em;
+        font-weight: bold;
+        color: #667eea;
+    }
+
+    .word-display {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 60px 40px;
+        border-radius: 20px;
+        text-align: center;
+        margin-bottom: 30px;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .word {
+        font-size: 4em;
+        font-weight: bold;
+        animation: wordPop 0.3s ease-out;
+    }
+
+    @keyframes wordPop {
+        0% {
+            transform: scale(0.8);
+            opacity: 0;
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .game-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .btn-skip {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-skip:hover {
+        background: #5a6268;
+    }
+
+    .btn-read {
+        background: #28a745;
+        color: white;
+    }
+
+    .btn-read:hover {
+        background: #218838;
+    }
+
+    /* Result Screen */
+    .result-card {
+        background: #f8f9fa;
+        padding: 30px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .result-title {
+        font-size: 2.5em;
+        color: #28a745;
+        margin-bottom: 20px;
+    }
+
+    .result-stats {
+        font-size: 1.5em;
+        color: #333;
+        margin: 15px 0;
+    }
+
+    .result-stats strong {
+        color: #667eea;
+    }
+
+    .leaderboard {
+        margin-top: 30px;
+    }
+
+    .leaderboard h2 {
+        color: #667eea;
+        margin-bottom: 20px;
+        font-size: 2em;
+    }
+
+    .leaderboard-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .leaderboard-table th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        text-align: left;
+        font-size: 1.1em;
+    }
+
+    .leaderboard-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .leaderboard-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .leaderboard-table tr:hover {
+        background: #f8f9fa;
+    }
+
+    .rank {
+        font-weight: bold;
+        color: #667eea;
+        font-size: 1.2em;
+    }
+
+    .rank-1 { color: #FFD700; }
+    .rank-2 { color: #C0C0C0; }
+    .rank-3 { color: #CD7F32; }
+
+    .result-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+
+    .emoji {
+        font-size: 1.2em;
+        margin-right: 8px;
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2em;
+        }
+
+        .word {
+            font-size: 2.5em;
+        }
+
+        .syllable-buttons {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .game-buttons,
+        .result-buttons {
+            grid-template-columns: 1fr;
+        }
+
+        .result-title {
+            font-size: 2em;
+        }
+
+        .result-stats {
+            font-size: 1.2em;
+        }
+
+        .leaderboard h2 {
+            font-size: 1.5em;
+        }
+
+        .leaderboard-table {
+            font-size: 0.9em;
+        }
+
+        .leaderboard-table th,
+        .leaderboard-table td {
+            padding: 10px 8px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        h1 {
+            font-size: 1.5em;
+        }
+
+        .word {
+            font-size: 2em;
+        }
+
+        .result-card {
+            padding: 20px;
+        }
+
+        .result-title {
+            font-size: 1.5em;
+        }
+
+        .result-stats {
+            font-size: 1em;
+        }
+
+        .leaderboard h2 {
+            font-size: 1.3em;
+        }
+
+        .leaderboard-table {
+            font-size: 0.8em;
+        }
+
+        .leaderboard-table th,
+        .leaderboard-table td {
+            padding: 8px 5px;
+        }
+
+        .btn {
+            padding: 15px;
+            font-size: 1.2em;
+        }
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ Blitz Lesen ⚡</h1>
+
+```
+    <!-- Start Screen -->
+    <div id="startScreen" class="screen active">
+        <div class="input-group">
+            <label for="playerName">Dein Name:</label>
+            <input type="text" id="playerName" placeholder="Gib deinen Namen ein..." maxlength="20">
+        </div>
+
+        <div class="input-group">
+            <label>Wie viele Silben?</label>
+            <div class="syllable-buttons">
+                <button class="syllable-btn" data-syllables="1">1</button>
+                <button class="syllable-btn" data-syllables="2">2</button>
+                <button class="syllable-btn" data-syllables="3">3</button>
+                <button class="syllable-btn" data-syllables="4">4</button>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" id="startBtn" disabled>
+            <span class="emoji">🚀</span> START
+        </button>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen">
+        <div class="game-header">
+            <div class="progress">Wort <span id="currentWord">1</span> von 10</div>
+        </div>
+
+        <div class="word-display">
+            <div class="word" id="wordDisplay">BEREIT?</div>
+        </div>
+
+        <div class="game-buttons">
+            <button class="btn btn-skip" id="skipBtn">
+                <span class="emoji">⏭️</span> ÜBERSPRINGEN
+            </button>
+            <button class="btn btn-read" id="readBtn">
+                <span class="emoji">✓</span> GELESEN
+            </button>
+        </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div id="resultScreen" class="screen">
+        <div class="result-card">
+            <div class="result-title">🎉 Geschafft! 🎉</div>
+            <div class="result-stats">
+                <span class="emoji">📖</span> <span id="wordsRead">0</span> von 10 Wörtern gelesen
+            </div>
+            <div class="result-stats">
+                <span class="emoji">⏱️</span> Endzeit: <strong id="finalTime">0</strong> Sekunden
+            </div>
+            <div class="result-stats" id="penaltyInfo" style="color: #dc3545; font-size: 1.2em; display: none;">
+                <span class="emoji">⚠️</span> +<span id="penaltySeconds">0</span>s Penalty
+            </div>
+        </div>
+
+        <div class="leaderboard">
+            <h2>🏆 Top 10 Rangliste</h2>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Platz</th>
+                        <th>Name</th>
+                        <th>Zeit</th>
+                        <th>Datum</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="result-buttons">
+            <button class="btn btn-secondary" id="newSettingsBtn">
+                <span class="emoji">⚙️</span> NEUE EINSTELLUNGEN
+            </button>
+            <button class="btn btn-primary" id="playAgainBtn">
+                <span class="emoji">🔄</span> NOCHMAL SPIELEN
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== WORD DATABASE ====================
+    const WORDS = {
+        1: [
+            // Tiere
+            'Hund', 'Kuh', 'Pferd', 'Fuchs', 'Hai', 'Wal', 'Wurm', 'Fisch', 'Huhn', 'Maus',
+            // Natur
+            'Baum', 'Gras', 'Wald', 'Berg', 'See', 'Fluss', 'Stein', 'Sand', 'Blatt', 'Ast',
+            // Essen
+            'Brot', 'Ei', 'Salz', 'Milch', 'Reis', 'Fisch', 'Fleisch', 'Saft', 'Eis', 'Brei',
+            // Haus & Möbel
+            'Haus', 'Tür', 'Dach', 'Wand', 'Bett', 'Stuhl', 'Tisch', 'Schrank', 'Topf', 'Glas',
+            // Kleidung
+            'Hut', 'Rock', 'Hemd', 'Hose', 'Schuh', 'Kleid', 'Gürtel', 'Schal', 'Mütze', 'Jacke',
+            // Körper
+            'Kopf', 'Arm', 'Bein', 'Hand', 'Fuß', 'Mund', 'Ohr', 'Zahn', 'Herz', 'Hals',
+            // Gegenstände
+            'Buch', 'Ball', 'Stift', 'Bild', 'Film', 'Boot', 'Zug', 'Tor', 'Zaun', 'Turm',
+            // Diverses
+            'Gold', 'Wind', 'Licht', 'Schnee', 'Fest', 'Spiel', 'Preis', 'Glück', 'Zeit', 'Ort',
+            // Weitere Nomen
+            'Korb', 'Kamm', 'Tuch', 'Nest', 'Kern', 'Halm', 'Staub', 'Dampf', 'Rauch', 'Strahl',
+            // Zusätzliche Wörter
+            'Ring', 'Spiegel', 'Brief', 'Keks', 'Schloss', 'Platz', 'Test', 'Text', 'Tanz', 'Frost'
+        ],
+        2: [
+            // Familie
+            'Ma-ma', 'Pa-pa', 'O-ma', 'O-pa', 'Tan-te', 'On-kel', 'Bru-der', 'Nef-fe', 'Nich-te', 'Cou-sin',
+            // Tiere
+            'Kat-ze', 'Pfer-de', 'Ti-ger', 'Lö-we', 'Af-fe', 'Bä-ren', 'Vö-gel', 'En-te', 'Gans', 'Schwan',
+            // Schule
+            'Schu-le', 'Ta-fel', 'Hef-te', 'Map-pe', 'Krei-de', 'Pau-se', 'Leh-rer', 'Klas-se', 'Stun-de', 'No-te',
+            // Natur
+            'Blu-me', 'Son-ne', 'Wol-ke', 'Re-gen', 'Wie-se', 'Hü-gel', 'In-sel', 'Teich', 'Quel-le', 'Wel-le',
+            // Essen & Trinken
+            'Ap-fel', 'Bir-ne', 'Zu-cker', 'Ho-nig', 'But-ter', 'Kä-se', 'Wurst', 'Sup-pe', 'Ku-chen', 'Piz-za',
+            // Haushalt
+            'Tel-ler', 'Ga-bel', 'Mes-ser', 'Löf-fel', 'Be-cher', 'Kan-ne', 'Scha-le', 'Pfan-ne', 'Tas-se', 'Fla-sche',
+            // Transport
+            'Au-to', 'Rol-ler', 'Wa-gen', 'Mo-tor', 'Rei-fen', 'Kof-fer', 'Ta-sche', 'Tü-te', 'Kar-ton', 'Pa-ket',
+            // Haus
+            'Gar-ten', 'Fens-ter', 'Trep-pe', 'Kel-ler', 'Bo-den', 'Raum', 'Zim-mer', 'Kü-che', 'Bad', 'Flu-r',
+            // Zeit
+            'Mor-gen', 'Mit-tag', 'A-bend', 'Nacht', 'Heu-te', 'Win-ter', 'Som-mer', 'Früh-ling', 'Herbst', 'Mo-nat',
+            // Diverses
+            'Far-be', 'Grö-ße', 'Län-ge', 'Brei-te', 'Hö-he', 'Tie-fe', 'Stär-ke', 'Käl-te', 'Wär-me', 'Hit-ze'
+        ],
+        3: [
+            // Früchte
+            'Ba-na-ne', 'O-ran-ge', 'Zi-tro-ne', 'A-na-nas', 'Erd-bee-re', 'Him-bee-re', 'Brom-bee-re', 'Kir-sche', 'Pflau-me', 'Me-lo-ne',
+            // Gemüse
+            'To-ma-te', 'Pap-ri-ka', 'Gur-ke', 'Zwie-bel', 'Möh-re', 'Boh-ne', 'Erb-se', 'Kar-tof-fel', 'Sel-le-rie', 'Ra-dies-chen',
+            // Tiere
+            'E-le-fant', 'Gi-raf-fe', 'Kro-ko-dil', 'Nas-horn', 'Pin-gu-in', 'Del-fin', 'Pan-da', 'Kan-gu-ru', 'Pa-pa-gei', 'Schmet-ter-ling',
+            // Familie & Menschen
+            'Fa-mi-lie', 'Mut-ter', 'Va-ter', 'Toch-ter', 'Schwes-ter', 'En-kel', 'Cou-si-ne', 'Nach-bar', 'Freun-din', 'Leh-re-rin',
+            // Essen
+            'Scho-ko-la-de', 'Nu-del', 'Bröt-chen', 'Jo-ghurt', 'Pud-ding', 'Sa-la-mi', 'Bon-bon', 'Ge-mü-se', 'Kar-tof-fel', 'O-me-lett',
+            // Technik
+            'Com-pu-ter', 'Te-le-fon', 'Ka-me-ra', 'Tab-let', 'Han-dy', 'Bat-te-rie', 'We-cker', 'Ra-dio', 'Lap-top', 'Dru-cker',
+            // Musik
+            'Gi-tar-re', 'Kla-vier', 'Trom-pe-te', 'Gei-ge', 'Flö-te', 'Trom-mel', 'Har-fe', 'Pan-flö-te', 'Man-do-li-ne', 'Xy-lo-fon',
+            // Orte
+            'Mu-se-um', 'Kran-ken-haus', 'Bü-che-rei', 'Bä-cke-rei', 'Ki-osk', 'Markt-platz', 'Flug-ha-fen', 'Bahn-hof', 'Hal-te-stel-le', 'Tank-stel-le',
+            // Spielzeug
+            'Spiel-zeug', 'Schau-kel', 'Rut-sche', 'Puz-zle', 'Krei-sel', 'Luft-bal-lon', 'Kar-te', 'Fi-gur', 'Pup-pe', 'Ro-bo-ter',
+            // Natur
+            'Re-gen-bo-gen', 'Ge-wit-ter', 'Ne-bel', 'Don-ner', 'Vul-kan', 'Ei-chen', 'Tan-ne', 'Blu-men', 'Grä-ser', 'Bü-sche'
+        ],
+        4: [
+            // Orte & Gebäude
+            'Kin-der-gar-ten', 'Klas-sen-zim-mer', 'Ba-de-zim-mer', 'Wohn-zim-mer', 'Schlaf-zim-mer', 'Ess-zim-mer', 'Ar-beits-zim-mer', 'Kin-der-zim-mer', 'Spei-se-kam-mer', 'Kel-ler-raum',
+            // Fahrzeuge & Transport
+            'Feu-er-wehr-au-to', 'Kran-ken-wa-gen', 'Hub-schrau-ber', 'Ei-sen-bahn', 'Las-ter-wa-gen', 'Mo-tor-rad', 'Om-ni-bus', 'Stra-ßen-bahn', 'Seil-bahn', 'Roll-trep-pe',
+            // Essen & Süßigkeiten
+            'Was-ser-me-lo-ne', 'Va-nil-le-eis', 'Ap-fel-ku-chen', 'Erb-sen-sup-pe', 'Nu-del-sup-pe', 'Kar-tof-fel-sa-lat', 'Obs-sa-lat', 'Reis-pud-ding', 'Zi-tro-nen-saft', 'Him-beer-saft',
+            // Spielplätze & Sport
+            'Spiel-platz-ge-rät', 'Schwimm-bad-be-cken', 'Fuß-ball-feld', 'Ten-nis-platz', 'Turn-hal-le', 'Sport-hal-le', 'Lauf-bahn', 'Spring-seil', 'Sand-kas-ten', 'Tram-po-lin',
+            // Haushaltsgeräte
+            'Wasch-ma-schi-ne', 'Spül-ma-schi-ne', 'Kühl-schrank', 'Mi-kro-wel-le', 'Staub-sau-ger', 'Bü-gel-ei-sen', 'Toas-ter', 'Was-ser-ko-cher', 'Kaf-fee-kan-ne', 'Mixer-ge-rät',
+            // Feste & Feiern
+            'Weih-nachts-baum', 'Os-ter-ha-se', 'Ni-ko-laus', 'Luft-schlan-ge', 'Kon-fet-ti', 'Gir-lan-de', 'Lam-pi-on', 'Ker-zen-stän-der', 'Ge-schenk-pa-pier', 'Par-ty-hut',
+            // Tiere
+            'Ma-ri-en-kä-fer', 'Re-gen-wurm', 'Was-ser-floh', 'See-pferd-chen', 'Tin-ten-fisch', 'Glüh-würm-chen', 'Schne-cken-haus', 'A-mei-sen-hau-fen', 'Spin-nen-netz', 'Bie-nen-stock',
+            // Märchen & Fantasie
+            'Prin-zes-sin', 'Kö-nig-reich', 'Zau-be-rer', 'Rit-ter-burg', 'Fee-nkö-ni-gin', 'Dra-chen-höh-le', 'Ein-horn-land', 'Zwer-gen-haus', 'Rie-sen-berg', 'He-xen-haus',
+            // Schulsachen
+            'Fe-der-map-pe', 'Li-ne-al-kas-ten', 'Ra-dier-gum-mi', 'Bunt-stift-satz', 'Schere-tui', 'Kle-ber-fla-sche', 'Blei-stift-spit-zer', 'Heft-um-schlag', 'Schul-ta-sche', 'Pau-sen-brot',
+            // Natur & Wetter
+            'Re-gen-schir-m', 'Son-nen-schir-m', 'Wet-ter-be-richt', 'Tem-pe-ra-tur', 'Jah-res-zeit', 'Him-mels-rich-tung', 'Mon-des-schein', 'Ster-nen-him-mel', 'Mor-gen-rot', 'A-bend-rot'
+        ]
+    };
+
+    // ==================== GAME STATE ====================
+    let gameState = {
+        playerName: '',
+        syllables: null,
+        currentWordIndex: 0,
+        wordsRead: 0,
+        wordsSkipped: 0,
+        startTime: null,
+        elapsedTime: 0,
+        timerInterval: null,
+        currentWords: []
+    };
+
+    // ==================== DOM ELEMENTS ====================
+    const screens = {
+        start: document.getElementById('startScreen'),
+        game: document.getElementById('gameScreen'),
+        result: document.getElementById('resultScreen')
+    };
+
+    const elements = {
+        playerName: document.getElementById('playerName'),
+        startBtn: document.getElementById('startBtn'),
+        currentWord: document.getElementById('currentWord'),
+        wordDisplay: document.getElementById('wordDisplay'),
+        skipBtn: document.getElementById('skipBtn'),
+        readBtn: document.getElementById('readBtn'),
+        wordsRead: document.getElementById('wordsRead'),
+        finalTime: document.getElementById('finalTime'),
+        penaltyInfo: document.getElementById('penaltyInfo'),
+        penaltySeconds: document.getElementById('penaltySeconds'),
+        leaderboardBody: document.getElementById('leaderboardBody'),
+        playAgainBtn: document.getElementById('playAgainBtn'),
+        newSettingsBtn: document.getElementById('newSettingsBtn')
+    };
+
+    // ==================== SYLLABLE SELECTION ====================
+    document.querySelectorAll('.syllable-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.syllable-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            gameState.syllables = parseInt(btn.dataset.syllables);
+            validateStartButton();
+        });
+    });
+
+    // ==================== NAME INPUT ====================
+    elements.playerName.addEventListener('input', validateStartButton);
+    elements.playerName.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !elements.startBtn.disabled) {
+            startGame();
+        }
+    });
+
+    function validateStartButton() {
+        const nameValid = elements.playerName.value.trim().length > 0;
+        const syllablesValid = gameState.syllables !== null;
+        elements.startBtn.disabled = !(nameValid && syllablesValid);
+    }
+
+    // ==================== START GAME ====================
+    elements.startBtn.addEventListener('click', startGame);
+
+    function startGame() {
+        gameState.playerName = elements.playerName.value.trim();
+        gameState.currentWordIndex = 0;
+        gameState.wordsRead = 0;
+        gameState.wordsSkipped = 0;
+        gameState.currentWords = getRandomWords(gameState.syllables, 10);
+        
+        showScreen('game');
+        startTimer();
+        showNextWord();
+    }
+
+    // ==================== WORD SELECTION ====================
+    function getRandomWords(syllables, count) {
+        const wordPool = [...WORDS[syllables]];
+        const selected = [];
+        
+        for (let i = 0; i < count && wordPool.length > 0; i++) {
+            const randomIndex = Math.floor(Math.random() * wordPool.length);
+            selected.push(wordPool.splice(randomIndex, 1)[0]);
+        }
+        
+        return selected;
+    }
+
+    function showNextWord() {
+        if (gameState.currentWordIndex < gameState.currentWords.length) {
+            elements.currentWord.textContent = gameState.currentWordIndex + 1;
+            elements.wordDisplay.textContent = gameState.currentWords[gameState.currentWordIndex];
+        } else {
+            endGame();
+        }
+    }
+
+    // ==================== TIMER ====================
+    function startTimer() {
+        gameState.startTime = Date.now();
+        gameState.timerInterval = setInterval(() => {
+            gameState.elapsedTime = Math.floor((Date.now() - gameState.startTime) / 1000);
+        }, 100);
+    }
+
+    function stopTimer() {
+        clearInterval(gameState.timerInterval);
+        gameState.elapsedTime = Math.floor((Date.now() - gameState.startTime) / 1000);
+    }
+
+    // ==================== GAME BUTTONS ====================
+    elements.readBtn.addEventListener('click', () => {
+        gameState.wordsRead++;
+        gameState.currentWordIndex++;
+        showNextWord();
+    });
+
+    elements.skipBtn.addEventListener('click', () => {
+        gameState.wordsSkipped++;
+        gameState.currentWordIndex++;
+        showNextWord();
+    });
+
+    // ==================== END GAME ====================
+    function endGame() {
+        stopTimer();
+        
+        const penalty = gameState.wordsSkipped * 3;
+        const finalTime = gameState.elapsedTime + penalty;
+        
+        elements.wordsRead.textContent = gameState.wordsRead;
+        elements.finalTime.textContent = finalTime;
+        
+        if (penalty > 0) {
+            elements.penaltyInfo.style.display = 'block';
+            elements.penaltySeconds.textContent = penalty;
+        } else {
+            elements.penaltyInfo.style.display = 'none';
+        }
+        
+        saveScore(gameState.playerName, finalTime, gameState.syllables);
+        displayLeaderboard(gameState.syllables);
+        showScreen('result');
+    }
+
+    // ==================== LEADERBOARD ====================
+    function saveScore(name, time, syllables) {
+        try {
+            const key = `leaderboard_${syllables}`;
+            let leaderboard = [];
+            
+            try {
+                const stored = localStorage.getItem(key);
+                if (stored) {
+                    leaderboard = JSON.parse(stored);
+                }
+            } catch (e) {
+                console.warn('Konnte gespeicherte Rangliste nicht laden:', e);
+            }
+            
+            const newEntry = {
+                name: name,
+                time: time,
+                date: new Date().toLocaleDateString('de-DE'),
+                syllables: syllables
+            };
+            
+            leaderboard.push(newEntry);
+            leaderboard.sort((a, b) => a.time - b.time);
+            leaderboard = leaderboard.slice(0, 10);
+            
+            try {
+                localStorage.setItem(key, JSON.stringify(leaderboard));
+            } catch (e) {
+                console.warn('Konnte Rangliste nicht speichern:', e);
+            }
+        } catch (e) {
+            console.error('Fehler beim Speichern der Rangliste:', e);
+        }
+    }
+
+    function displayLeaderboard(syllables) {
+        try {
+            const key = `leaderboard_${syllables}`;
+            let leaderboard = [];
+            
+            try {
+                const stored = localStorage.getItem(key);
+                if (stored) {
+                    leaderboard = JSON.parse(stored);
+                }
+            } catch (e) {
+                console.warn('Konnte Rangliste nicht laden:', e);
+            }
+            
+            elements.leaderboardBody.innerHTML = '';
+            
+            if (leaderboard.length === 0) {
+                elements.leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Noch keine Einträge</td></tr>';
+                return;
+            }
+            
+            leaderboard.forEach((entry, index) => {
+                const row = document.createElement('tr');
+                const rankClass = index < 3 ? `rank-${index + 1}` : '';
+                
+                row.innerHTML = `
+                    <td class="rank ${rankClass}">${index + 1}.</td>
+                    <td>${entry.name}</td>
+                    <td><strong>${entry.time}s</strong></td>
+                    <td>${entry.date}</td>
+                `;
+                
+                elements.leaderboardBody.appendChild(row);
+            });
+        } catch (e) {
+            console.error('Fehler beim Anzeigen der Rangliste:', e);
+            elements.leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Rangliste konnte nicht geladen werden</td></tr>';
+        }
+    }
+
+    // ==================== RESULT BUTTONS ====================
+    elements.playAgainBtn.addEventListener('click', () => {
+        startGame();
+    });
+
+    elements.newSettingsBtn.addEventListener('click', () => {
+        showScreen('start');
+    });
+
+    // ==================== SCREEN MANAGEMENT ====================
+    function showScreen(screenName) {
+        Object.values(screens).forEach(screen => screen.classList.remove('active'));
+        screens[screenName].classList.add('active');
+    }
+
+    // ==================== INITIALIZE ====================
+    function checkLocalStorage() {
+        try {
+            const test = '__localStorage_test__';
+            localStorage.setItem(test, test);
+            localStorage.removeItem(test);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    console.log('Blitz Lesen App geladen!');
+    console.log('Wort-Datenbank:', {
+        '1 Silbe': WORDS[1].length,
+        '2 Silben': WORDS[2].length,
+        '3 Silben': WORDS[3].length,
+        '4 Silben': WORDS[4].length,
+        'Gesamt': WORDS[1].length + WORDS[2].length + WORDS[3].length + WORDS[4].length
+    });
+    
+    const storageAvailable = checkLocalStorage();
+    if (!storageAvailable) {
+        console.warn('LocalStorage ist nicht verfügbar. Ranglisten können nicht gespeichert werden.');
+    } else {
+        console.log('LocalStorage verfügbar - Ranglisten werden gespeichert.');
+    }
+</script>
+```
+
+</body>
+</html>
