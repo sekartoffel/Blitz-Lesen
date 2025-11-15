@@ -1,5 +1,5 @@
 const WORDS ={
-  1: [
+  "1": [
       // Tiere
       'Hund', 'Kuh', 'Pferd', 'Fuchs', 'Hai', 'Wal', 'Wurm', 'Fisch', 'Huhn', 'Maus',
       // Natur
@@ -21,7 +21,7 @@ const WORDS ={
       // Zusätzliche Wörter
       'Ring', 'Spiegel', 'Brief', 'Keks', 'Schloss', 'Platz', 'Test', 'Text', 'Tanz', 'Frost'
   ],
-  2: [
+  "2": [
       // Familie
       'Ma-ma', 'Pa-pa', 'O-ma', 'O-pa', 'Tan-te', 'On-kel', 'Bru-der', 'Nef-fe', 'Nich-te', 'Cou-sin',
       // Tiere
@@ -43,7 +43,7 @@ const WORDS ={
       // Diverses
       'Far-be', 'Grö-ße', 'Län-ge', 'Brei-te', 'Hö-he', 'Tie-fe', 'Stär-ke', 'Käl-te', 'Wär-me', 'Hit-ze'
   ],
-  3: [
+  "3": [
       // Früchte
       'Ba-na-ne', 'O-ran-ge', 'Zi-tro-ne', 'A-na-nas', 'Erd-bee-re', 'Him-bee-re', 'Brom-bee-re', 'Kir-sche', 'Pflau-me', 'Me-lo-ne',
       // Gemüse
@@ -65,7 +65,7 @@ const WORDS ={
       // Natur
       'Re-gen-bo-gen', 'Ge-wit-ter', 'Ne-bel', 'Don-ner', 'Vul-kan', 'Ei-chen', 'Tan-ne', 'Blu-men', 'Grä-ser', 'Bü-sche'
   ],
-  4: [
+  "4": [
       // Orte & Gebäude
       'Kin-der-gar-ten', 'Klas-sen-zim-mer', 'Ba-de-zim-mer', 'Wohn-zim-mer', 'Schlaf-zim-mer', 'Ess-zim-mer', 'Ar-beits-zim-mer', 'Kin-der-zim-mer', 'Spei-se-kam-mer', 'Kel-ler-raum',
       // Fahrzeuge & Transport
