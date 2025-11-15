@@ -1,4 +1,4 @@
-{
+const WORDS ={
   1: [
       // Tiere
       'Hund', 'Kuh', 'Pferd', 'Fuchs', 'Hai', 'Wal', 'Wurm', 'Fisch', 'Huhn', 'Maus',
