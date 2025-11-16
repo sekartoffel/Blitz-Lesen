@@ -19,7 +19,12 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-    
+
+    <!-- Google Fonts - Serifenschrift für Erstklässler -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;700&display=swap" rel="stylesheet">
+
     <script src="word_db.js"></script>
     <style>
         * {
@@ -29,7 +34,7 @@
         }
 
         body {
-            font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif;
+            font-family: 'Bitter', Georgia, 'Times New Roman', serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -307,6 +312,58 @@
         .rank-2 { color: #C0C0C0; }
         .rank-3 { color: #CD7F32; }
 
+        .leaderboard-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .syllable-tabs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .syllable-tab {
+            padding: 8px 16px;
+            font-size: 1em;
+            font-weight: bold;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .syllable-tab:hover {
+            background: #f0f0ff;
+        }
+
+        .syllable-tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-reset {
+            padding: 8px 16px;
+            font-size: 0.9em;
+            font-weight: bold;
+            border: 2px solid #dc3545;
+            background: white;
+            color: #dc3545;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-reset:hover {
+            background: #dc3545;
+            color: white;
+        }
+
         .result-buttons {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -370,6 +427,24 @@
             .leaderboard-table td {
                 padding: 10px 8px;
             }
+
+            .leaderboard-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .syllable-tabs {
+                justify-content: center;
+            }
+
+            .syllable-tab {
+                padding: 6px 12px;
+                font-size: 0.9em;
+            }
+
+            .btn-reset {
+                align-self: center;
+            }
         }
 
         @media (max-width: 480px) {
@@ -409,6 +484,15 @@
             .btn {
                 padding: 15px;
                 font-size: 1.2em;
+            }
+
+            .syllable-tab {
+                padding: 5px 10px;
+                font-size: 0.8em;
+            }
+
+            .btn-reset {
+                font-size: 0.8em;
             }
         }
     </style>
@@ -476,6 +560,15 @@
 
             <div class="leaderboard">
                 <h2>🏆 Top 10 Rangliste</h2>
+                <div class="leaderboard-controls">
+                    <div class="syllable-tabs">
+                        <button class="syllable-tab" data-syllables="1">1 Silbe</button>
+                        <button class="syllable-tab" data-syllables="2">2 Silben</button>
+                        <button class="syllable-tab" data-syllables="3">3 Silben</button>
+                        <button class="syllable-tab" data-syllables="4">4 Silben</button>
+                    </div>
+                    <button class="btn-reset" id="resetLeaderboardBtn">Zurücksetzen</button>
+                </div>
                 <table class="leaderboard-table">
                     <thead>
                         <tr>
@@ -540,8 +633,12 @@
             penaltySeconds: document.getElementById('penaltySeconds'),
             leaderboardBody: document.getElementById('leaderboardBody'),
             playAgainBtn: document.getElementById('playAgainBtn'),
-            newSettingsBtn: document.getElementById('newSettingsBtn')
+            newSettingsBtn: document.getElementById('newSettingsBtn'),
+            resetLeaderboardBtn: document.getElementById('resetLeaderboardBtn')
         };
+
+        // Track currently displayed leaderboard syllables
+        let currentLeaderboardSyllables = 1;
 
         // ==================== SYLLABLE SELECTION ====================
         document.querySelectorAll('.syllable-btn').forEach(btn => {
@@ -653,6 +750,7 @@
             }
             
             saveScore(gameState.playerName, finalTime, gameState.syllables);
+            updateLeaderboardTabs(gameState.syllables);
             displayLeaderboard(gameState.syllables);
             showScreen('result');
         }
@@ -741,6 +839,52 @@
         elements.newSettingsBtn.addEventListener('click', () => {
             showScreen('start');
         });
+
+        // ==================== LEADERBOARD CONTROLS ====================
+        // Syllable tabs for switching between leaderboards
+        document.querySelectorAll('.syllable-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const syllables = parseInt(tab.dataset.syllables);
+                currentLeaderboardSyllables = syllables;
+
+                // Update active tab
+                document.querySelectorAll('.syllable-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // Display the selected leaderboard
+                displayLeaderboard(syllables);
+            });
+        });
+
+        // Reset leaderboard button
+        elements.resetLeaderboardBtn.addEventListener('click', () => {
+            if (confirm(`Möchtest du wirklich die Rangliste für ${currentLeaderboardSyllables} Silbe(n) zurücksetzen? Dies kann nicht rückgängig gemacht werden!`)) {
+                resetLeaderboard(currentLeaderboardSyllables);
+            }
+        });
+
+        function resetLeaderboard(syllables) {
+            try {
+                const key = `leaderboard_${syllables}`;
+                localStorage.removeItem(key);
+                displayLeaderboard(syllables);
+                console.log(`Rangliste für ${syllables} Silbe(n) wurde zurückgesetzt.`);
+            } catch (e) {
+                console.error('Fehler beim Zurücksetzen der Rangliste:', e);
+                alert('Rangliste konnte nicht zurückgesetzt werden.');
+            }
+        }
+
+        function updateLeaderboardTabs(syllables) {
+            currentLeaderboardSyllables = syllables;
+            document.querySelectorAll('.syllable-tab').forEach(tab => {
+                if (parseInt(tab.dataset.syllables) === syllables) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+        }
 
         // ==================== SCREEN MANAGEMENT ====================
         function showScreen(screenName) {
