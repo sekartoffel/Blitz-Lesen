@@ -83,23 +83,23 @@
 
         /* Start Screen */
         .input-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         label {
             display: block;
-            font-size: 1.3em;
+            font-size: 1.1em;
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-weight: bold;
         }
 
         input[type="text"] {
             width: 100%;
-            padding: 15px;
-            font-size: 1.2em;
+            padding: 12px;
+            font-size: 1.1em;
             border: 3px solid #667eea;
-            border-radius: 15px;
+            border-radius: 12px;
             outline: none;
             transition: all 0.3s;
         }
@@ -110,26 +110,27 @@
         }
 
         .syllable-buttons {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
         }
 
         .syllable-btn {
-            padding: 20px;
-            font-size: 1.5em;
+            flex: 1;
+            padding: 12px 8px;
+            font-size: 1.2em;
             font-weight: bold;
-            border: 3px solid #ddd;
+            border: 2px solid #ddd;
             background: white;
-            border-radius: 15px;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s;
+            min-width: 0;
         }
 
         .syllable-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .syllable-btn.selected {
@@ -140,14 +141,14 @@
 
         .btn {
             width: 100%;
-            padding: 20px;
-            font-size: 1.5em;
+            padding: 15px;
+            font-size: 1.3em;
             font-weight: bold;
             border: none;
-            border-radius: 15px;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s;
-            margin-top: 20px;
+            margin-top: 15px;
         }
 
         .btn-primary {
@@ -317,17 +318,11 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
-            flex-wrap: wrap;
             gap: 10px;
         }
 
-        .syllable-tabs {
-            display: flex;
-            gap: 8px;
-        }
-
-        .syllable-tab {
-            padding: 8px 16px;
+        .syllable-select {
+            padding: 8px 12px;
             font-size: 1em;
             font-weight: bold;
             border: 2px solid #667eea;
@@ -335,40 +330,53 @@
             color: #667eea;
             border-radius: 10px;
             cursor: pointer;
+            outline: none;
+            min-width: 120px;
+        }
+
+        .syllable-select:focus {
+            box-shadow: 0 0 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-reset-icon {
+            padding: 8px 10px;
+            font-size: 1.2em;
+            border: 2px solid #dc3545;
+            background: white;
+            color: #dc3545;
+            border-radius: 10px;
+            cursor: pointer;
             transition: all 0.3s;
+            line-height: 1;
         }
 
-        .syllable-tab:hover {
-            background: #f0f0ff;
-        }
-
-        .syllable-tab.active {
-            background: #667eea;
+        .btn-reset-icon:hover {
+            background: #dc3545;
             color: white;
         }
 
         .game-type-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
         }
 
         .game-type-btn {
-            padding: 15px;
-            font-size: 1.2em;
+            flex: 1;
+            padding: 10px;
+            font-size: 1em;
             font-weight: bold;
-            border: 3px solid #ddd;
+            border: 2px solid #ddd;
             background: white;
-            border-radius: 15px;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s;
             text-align: center;
         }
 
         .game-type-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .game-type-btn.selected {
@@ -379,28 +387,12 @@
 
         .game-type-btn small {
             display: block;
-            font-size: 0.7em;
+            font-size: 0.65em;
             font-weight: normal;
-            margin-top: 5px;
+            margin-top: 3px;
             opacity: 0.9;
         }
 
-        .btn-reset {
-            padding: 8px 16px;
-            font-size: 0.9em;
-            font-weight: bold;
-            border: 2px solid #dc3545;
-            background: white;
-            color: #dc3545;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-reset:hover {
-            background: #dc3545;
-            color: white;
-        }
 
         .result-buttons {
             display: grid;
@@ -436,12 +428,13 @@
                 font-size: 2.5em;
             }
 
-            .syllable-buttons {
-                grid-template-columns: repeat(2, 1fr);
+            .syllable-btn {
+                padding: 10px 6px;
+                font-size: 1.1em;
             }
 
-            .game-type-buttons {
-                grid-template-columns: 1fr;
+            .game-type-btn small {
+                font-size: 0.6em;
             }
 
             .game-buttons,
@@ -462,30 +455,12 @@
             }
 
             .leaderboard-table {
-                font-size: 0.9em;
+                font-size: 1em;
             }
 
             .leaderboard-table th,
             .leaderboard-table td {
                 padding: 10px 8px;
-            }
-
-            .leaderboard-controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .syllable-tabs {
-                justify-content: center;
-            }
-
-            .syllable-tab {
-                padding: 6px 12px;
-                font-size: 0.9em;
-            }
-
-            .btn-reset {
-                align-self: center;
             }
         }
 
@@ -515,7 +490,7 @@
             }
 
             .leaderboard-table {
-                font-size: 0.8em;
+                font-size: 1em;
             }
 
             .leaderboard-table th,
@@ -526,15 +501,6 @@
             .btn {
                 padding: 15px;
                 font-size: 1.2em;
-            }
-
-            .syllable-tab {
-                padding: 5px 10px;
-                font-size: 0.8em;
-            }
-
-            .btn-reset {
-                font-size: 0.8em;
             }
 
             .game-type-btn {
@@ -620,15 +586,15 @@
             </div>
 
             <div class="leaderboard">
-                <h2>🏆 Top 10 Rangliste</h2>
+                <h2>🏆 Top 5 Rangliste</h2>
                 <div class="leaderboard-controls">
-                    <div class="syllable-tabs">
-                        <button class="syllable-tab" data-syllables="1">1 Silbe</button>
-                        <button class="syllable-tab" data-syllables="2">2 Silben</button>
-                        <button class="syllable-tab" data-syllables="3">3 Silben</button>
-                        <button class="syllable-tab" data-syllables="4">4 Silben</button>
-                    </div>
-                    <button class="btn-reset" id="resetLeaderboardBtn">Zurücksetzen</button>
+                    <select class="syllable-select" id="syllableSelect">
+                        <option value="1">1 Silbe</option>
+                        <option value="2">2 Silben</option>
+                        <option value="3">3 Silben</option>
+                        <option value="4">4 Silben</option>
+                    </select>
+                    <button class="btn-reset-icon" id="resetLeaderboardBtn" title="Rangliste zurücksetzen">🗑️</button>
                 </div>
                 <table class="leaderboard-table">
                     <thead>
@@ -697,7 +663,8 @@
             leaderboardBody: document.getElementById('leaderboardBody'),
             playAgainBtn: document.getElementById('playAgainBtn'),
             newSettingsBtn: document.getElementById('newSettingsBtn'),
-            resetLeaderboardBtn: document.getElementById('resetLeaderboardBtn')
+            resetLeaderboardBtn: document.getElementById('resetLeaderboardBtn'),
+            syllableSelect: document.getElementById('syllableSelect')
         };
 
         // Track currently displayed leaderboard syllables
@@ -878,7 +845,7 @@
                 
                 leaderboard.push(newEntry);
                 leaderboard.sort((a, b) => a.time - b.time);
-                leaderboard = leaderboard.slice(0, 10);
+                leaderboard = leaderboard.slice(0, 5);
                 
                 try {
                     localStorage.setItem(key, JSON.stringify(leaderboard));
@@ -940,19 +907,11 @@
         });
 
         // ==================== LEADERBOARD CONTROLS ====================
-        // Syllable tabs for switching between leaderboards
-        document.querySelectorAll('.syllable-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                const syllables = parseInt(tab.dataset.syllables);
-                currentLeaderboardSyllables = syllables;
-
-                // Update active tab
-                document.querySelectorAll('.syllable-tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-
-                // Display the selected leaderboard
-                displayLeaderboard(syllables);
-            });
+        // Syllable dropdown for switching between leaderboards
+        elements.syllableSelect.addEventListener('change', () => {
+            const syllables = parseInt(elements.syllableSelect.value);
+            currentLeaderboardSyllables = syllables;
+            displayLeaderboard(syllables);
         });
 
         // Reset leaderboard button
@@ -976,13 +935,7 @@
 
         function updateLeaderboardTabs(syllables) {
             currentLeaderboardSyllables = syllables;
-            document.querySelectorAll('.syllable-tab').forEach(tab => {
-                if (parseInt(tab.dataset.syllables) === syllables) {
-                    tab.classList.add('active');
-                } else {
-                    tab.classList.remove('active');
-                }
-            });
+            elements.syllableSelect.value = syllables;
         }
 
         // ==================== SCREEN MANAGEMENT ====================
