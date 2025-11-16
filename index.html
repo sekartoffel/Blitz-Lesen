@@ -347,6 +347,44 @@
             color: white;
         }
 
+        .game-type-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .game-type-btn {
+            padding: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border: 3px solid #ddd;
+            background: white;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .game-type-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-type-btn.selected {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .game-type-btn small {
+            display: block;
+            font-size: 0.7em;
+            font-weight: normal;
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+
         .btn-reset {
             padding: 8px 16px;
             font-size: 0.9em;
@@ -400,6 +438,10 @@
 
             .syllable-buttons {
                 grid-template-columns: repeat(2, 1fr);
+            }
+
+            .game-type-buttons {
+                grid-template-columns: 1fr;
             }
 
             .game-buttons,
@@ -494,6 +536,11 @@
             .btn-reset {
                 font-size: 0.8em;
             }
+
+            .game-type-btn {
+                padding: 10px;
+                font-size: 1em;
+            }
         }
     </style>
 </head>
@@ -515,6 +562,20 @@
                     <button class="syllable-btn" data-syllables="2">2</button>
                     <button class="syllable-btn" data-syllables="3">3</button>
                     <button class="syllable-btn" data-syllables="4">4</button>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Spieltyp:</label>
+                <div class="game-type-buttons">
+                    <button class="game-type-btn" data-type="entziffern">
+                        Entziffern
+                        <small>Wort bleibt sichtbar</small>
+                    </button>
+                    <button class="game-type-btn" data-type="erkennen">
+                        Erkennen
+                        <small>Wort nur 1 Sekunde</small>
+                    </button>
                 </div>
             </div>
 
@@ -604,13 +665,15 @@
         let gameState = {
             playerName: '',
             syllables: null,
+            gameType: null,
             currentWordIndex: 0,
             wordsRead: 0,
             wordsSkipped: 0,
             startTime: null,
             elapsedTime: 0,
             timerInterval: null,
-            currentWords: []
+            currentWords: [],
+            wordHideTimeout: null
         };
 
         // ==================== DOM ELEMENTS ====================
@@ -650,6 +713,16 @@
             });
         });
 
+        // ==================== GAME TYPE SELECTION ====================
+        document.querySelectorAll('.game-type-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.game-type-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                gameState.gameType = btn.dataset.type;
+                validateStartButton();
+            });
+        });
+
         // ==================== NAME INPUT ====================
         elements.playerName.addEventListener('input', validateStartButton);
         elements.playerName.addEventListener('keypress', (e) => {
@@ -661,7 +734,8 @@
         function validateStartButton() {
             const nameValid = elements.playerName.value.trim().length > 0;
             const syllablesValid = gameState.syllables !== null;
-            elements.startBtn.disabled = !(nameValid && syllablesValid);
+            const gameTypeValid = gameState.gameType !== null;
+            elements.startBtn.disabled = !(nameValid && syllablesValid && gameTypeValid);
         }
 
         // ==================== START GAME ====================
@@ -672,13 +746,19 @@
                 alert('Wörter werden noch geladen, bitte warte einen Moment...');
                 return;
             }
-            
+
             gameState.playerName = elements.playerName.value.trim();
             gameState.currentWordIndex = 0;
             gameState.wordsRead = 0;
             gameState.wordsSkipped = 0;
             gameState.currentWords = getRandomWords(gameState.syllables, 10);
-            
+
+            // Clear any pending word hide timeout
+            if (gameState.wordHideTimeout) {
+                clearTimeout(gameState.wordHideTimeout);
+                gameState.wordHideTimeout = null;
+            }
+
             showScreen('game');
             startTimer();
             showNextWord();
@@ -698,9 +778,22 @@
         }
 
         function showNextWord() {
+            // Clear any pending hide timeout
+            if (gameState.wordHideTimeout) {
+                clearTimeout(gameState.wordHideTimeout);
+                gameState.wordHideTimeout = null;
+            }
+
             if (gameState.currentWordIndex < gameState.currentWords.length) {
                 elements.currentWord.textContent = gameState.currentWordIndex + 1;
                 elements.wordDisplay.textContent = gameState.currentWords[gameState.currentWordIndex];
+
+                // For "erkennen" mode, hide word after 1 second
+                if (gameState.gameType === 'erkennen') {
+                    gameState.wordHideTimeout = setTimeout(() => {
+                        elements.wordDisplay.textContent = '?';
+                    }, 1000);
+                }
             } else {
                 endGame();
             }
@@ -735,7 +828,13 @@
         // ==================== END GAME ====================
         function endGame() {
             stopTimer();
-            
+
+            // Clear any pending word hide timeout
+            if (gameState.wordHideTimeout) {
+                clearTimeout(gameState.wordHideTimeout);
+                gameState.wordHideTimeout = null;
+            }
+
             const penalty = gameState.wordsSkipped * 3;
             const finalTime = gameState.elapsedTime + penalty;
             
