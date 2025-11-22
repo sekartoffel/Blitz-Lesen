@@ -415,6 +415,79 @@
             margin-right: 8px;
         }
 
+        /* Settings Screen */
+        .settings-group {
+            margin-bottom: 25px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .settings-title {
+            font-size: 1.2em;
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-title label {
+            cursor: pointer;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .group-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .letter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .letter-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .letter-checkbox:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .letter-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .letter-checkbox input[type="checkbox"]:checked {
+            accent-color: #667eea;
+        }
+
+        .settings-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
@@ -438,8 +511,13 @@
             }
 
             .game-buttons,
-            .result-buttons {
+            .result-buttons,
+            .settings-buttons {
                 grid-template-columns: 1fr;
+            }
+
+            .letter-grid {
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
             }
 
             .result-title {
@@ -548,6 +626,122 @@
             <button class="btn btn-primary" id="startBtn" disabled>
                 <span class="emoji">🚀</span> START
             </button>
+
+            <button class="btn btn-secondary" id="settingsBtn" style="margin-top: 10px;">
+                <span class="emoji">⚙️</span> SCHWIERIGKEIT EINSTELLEN
+            </button>
+        </div>
+
+        <!-- Settings Screen -->
+        <div id="settingsScreen" class="screen">
+            <h2 style="color: #667eea; margin-bottom: 20px;">Schwierigkeit einstellen</h2>
+            <p style="margin-bottom: 20px; color: #666;">Wähle die Buchstaben und Kombinationen, die in den Wörtern vorkommen dürfen:</p>
+
+            <div class="settings-group">
+                <h3 class="settings-title">
+                    <input type="checkbox" id="checkBasic" class="group-checkbox" checked>
+                    <label for="checkBasic">Basis-Buchstaben (einfach)</label>
+                </h3>
+                <div class="letter-grid" id="basicLetters">
+                    <label class="letter-checkbox"><input type="checkbox" value="a" checked> a</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="e" checked> e</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="i" checked> i</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="o" checked> o</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="u" checked> u</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="m" checked> m</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="n" checked> n</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="l" checked> l</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="t" checked> t</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="s" checked> s</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="r" checked> r</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="p" checked> p</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="d" checked> d</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="h" checked> h</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="f" checked> f</label>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3 class="settings-title">
+                    <input type="checkbox" id="checkExtended" class="group-checkbox" checked>
+                    <label for="checkExtended">Erweiterte Buchstaben</label>
+                </h3>
+                <div class="letter-grid" id="extendedLetters">
+                    <label class="letter-checkbox"><input type="checkbox" value="k" checked> k</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="w" checked> w</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="g" checked> g</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="b" checked> b</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="z" checked> z</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="j" checked> j</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="v" checked> v</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="c" checked> c</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="y" checked> y</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="x" checked> x</label>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3 class="settings-title">
+                    <input type="checkbox" id="checkUmlauts" class="group-checkbox" checked>
+                    <label for="checkUmlauts">Umlaute</label>
+                </h3>
+                <div class="letter-grid" id="umlautLetters">
+                    <label class="letter-checkbox"><input type="checkbox" value="ä" checked> ä</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="ö" checked> ö</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="ü" checked> ü</label>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3 class="settings-title">
+                    <input type="checkbox" id="checkDiphthongs" class="group-checkbox" checked>
+                    <label for="checkDiphthongs">Diphthonge (Zwielaute)</label>
+                </h3>
+                <div class="letter-grid" id="diphthongLetters">
+                    <label class="letter-checkbox"><input type="checkbox" value="ei" checked> ei</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="au" checked> au</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="eu" checked> eu</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="äu" checked> äu</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="ai" checked> ai</label>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3 class="settings-title">
+                    <input type="checkbox" id="checkCombinations" class="group-checkbox" checked>
+                    <label for="checkCombinations">Konsonantenkombinationen (schwierig)</label>
+                </h3>
+                <div class="letter-grid" id="combinationLetters">
+                    <label class="letter-checkbox"><input type="checkbox" value="ch" checked> ch</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="sch" checked> sch</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="st" checked> st</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="sp" checked> sp</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="pf" checked> pf</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="ck" checked> ck</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="ng" checked> ng</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="qu" checked> qu</label>
+                    <label class="letter-checkbox"><input type="checkbox" value="tz" checked> tz</label>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3 class="settings-title">
+                    <input type="checkbox" id="checkSpecial" class="group-checkbox" checked>
+                    <label for="checkSpecial">Sonderzeichen</label>
+                </h3>
+                <div class="letter-grid" id="specialLetters">
+                    <label class="letter-checkbox"><input type="checkbox" value="ß" checked> ß</label>
+                </div>
+            </div>
+
+            <div class="settings-buttons">
+                <button class="btn btn-secondary" id="backToStartBtn">
+                    <span class="emoji">←</span> ZURÜCK
+                </button>
+                <button class="btn btn-primary" id="saveSettingsBtn">
+                    <span class="emoji">✓</span> SPEICHERN
+                </button>
+            </div>
         </div>
 
         <!-- Game Screen -->
@@ -645,6 +839,7 @@
         // ==================== DOM ELEMENTS ====================
         const screens = {
             start: document.getElementById('startScreen'),
+            settings: document.getElementById('settingsScreen'),
             game: document.getElementById('gameScreen'),
             result: document.getElementById('resultScreen')
         };
@@ -652,6 +847,9 @@
         const elements = {
             playerName: document.getElementById('playerName'),
             startBtn: document.getElementById('startBtn'),
+            settingsBtn: document.getElementById('settingsBtn'),
+            backToStartBtn: document.getElementById('backToStartBtn'),
+            saveSettingsBtn: document.getElementById('saveSettingsBtn'),
             currentWord: document.getElementById('currentWord'),
             wordDisplay: document.getElementById('wordDisplay'),
             skipBtn: document.getElementById('skipBtn'),
@@ -669,6 +867,20 @@
 
         // Track currently displayed leaderboard syllables
         let currentLeaderboardSyllables = 1;
+
+        // ==================== SETTINGS NAVIGATION ====================
+        elements.settingsBtn.addEventListener('click', () => {
+            showScreen('settings');
+        });
+
+        elements.backToStartBtn.addEventListener('click', () => {
+            showScreen('start');
+        });
+
+        elements.saveSettingsBtn.addEventListener('click', () => {
+            saveLetterSettings();
+            showScreen('start');
+        });
 
         // ==================== SYLLABLE SELECTION ====================
         document.querySelectorAll('.syllable-btn').forEach(btn => {
@@ -720,6 +932,12 @@
             gameState.wordsSkipped = 0;
             gameState.currentWords = getRandomWords(gameState.syllables, 10);
 
+            // Check if we have enough words
+            if (gameState.currentWords.length === 0) {
+                showScreen('settings');
+                return;
+            }
+
             // Clear any pending word hide timeout
             if (gameState.wordHideTimeout) {
                 clearTimeout(gameState.wordHideTimeout);
@@ -733,14 +951,27 @@
 
         // ==================== WORD SELECTION ====================
         function getRandomWords(syllables, count) {
-            const wordPool = [...WORDS[syllables]];
+            // Filter words by allowed letters
+            const allowedWords = WORDS[syllables].filter(word => isWordAllowed(word));
+
+            if (allowedWords.length === 0) {
+                alert('Mit den aktuellen Einstellungen gibt es keine passenden Wörter! Bitte wähle mehr Buchstaben aus.');
+                return [];
+            }
+
+            if (allowedWords.length < count) {
+                console.warn(`Nur ${allowedWords.length} Wörter verfügbar, ${count} angefordert`);
+            }
+
+            const wordPool = [...allowedWords];
             const selected = [];
-            
+
             for (let i = 0; i < count && wordPool.length > 0; i++) {
                 const randomIndex = Math.floor(Math.random() * wordPool.length);
                 selected.push(wordPool.splice(randomIndex, 1)[0]);
             }
-            
+
+            console.log(`${selected.length} Wörter ausgewählt aus ${allowedWords.length} verfügbaren Wörtern`);
             return selected;
         }
 
@@ -944,6 +1175,149 @@
             screens[screenName].classList.add('active');
         }
 
+        // ==================== LETTER SETTINGS ====================
+        // Group checkbox functionality
+        document.querySelectorAll('.group-checkbox').forEach(groupCheckbox => {
+            groupCheckbox.addEventListener('change', (e) => {
+                const groupId = e.target.id.replace('check', '').toLowerCase();
+                const container = document.getElementById(groupId + 'Letters');
+                if (container) {
+                    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+                    checkboxes.forEach(cb => {
+                        cb.checked = e.target.checked;
+                    });
+                }
+            });
+        });
+
+        // Update group checkbox when individual checkboxes change
+        document.querySelectorAll('.letter-grid').forEach(grid => {
+            grid.addEventListener('change', (e) => {
+                if (e.target.type === 'checkbox') {
+                    updateGroupCheckbox(grid);
+                }
+            });
+        });
+
+        function updateGroupCheckbox(grid) {
+            const groupId = grid.id.replace('Letters', '');
+            const groupCheckbox = document.getElementById('check' + groupId.charAt(0).toUpperCase() + groupId.slice(1));
+
+            if (groupCheckbox) {
+                const checkboxes = Array.from(grid.querySelectorAll('input[type="checkbox"]'));
+                const allChecked = checkboxes.every(cb => cb.checked);
+                groupCheckbox.checked = allChecked;
+            }
+        }
+
+        function saveLetterSettings() {
+            const settings = {
+                basic: [],
+                extended: [],
+                umlauts: [],
+                diphthongs: [],
+                combinations: [],
+                special: []
+            };
+
+            document.querySelectorAll('#basicLetters input[type="checkbox"]:checked').forEach(cb => {
+                settings.basic.push(cb.value);
+            });
+            document.querySelectorAll('#extendedLetters input[type="checkbox"]:checked').forEach(cb => {
+                settings.extended.push(cb.value);
+            });
+            document.querySelectorAll('#umlautLetters input[type="checkbox"]:checked').forEach(cb => {
+                settings.umlauts.push(cb.value);
+            });
+            document.querySelectorAll('#diphthongLetters input[type="checkbox"]:checked').forEach(cb => {
+                settings.diphthongs.push(cb.value);
+            });
+            document.querySelectorAll('#combinationLetters input[type="checkbox"]:checked').forEach(cb => {
+                settings.combinations.push(cb.value);
+            });
+            document.querySelectorAll('#specialLetters input[type="checkbox"]:checked').forEach(cb => {
+                settings.special.push(cb.value);
+            });
+
+            try {
+                localStorage.setItem('letterSettings', JSON.stringify(settings));
+                console.log('Buchstaben-Einstellungen gespeichert:', settings);
+            } catch (e) {
+                console.warn('Konnte Einstellungen nicht speichern:', e);
+            }
+        }
+
+        function loadLetterSettings() {
+            try {
+                const stored = localStorage.getItem('letterSettings');
+                if (!stored) return;
+
+                const settings = JSON.parse(stored);
+
+                // Uncheck all first
+                document.querySelectorAll('.letter-checkbox input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                });
+
+                // Check stored settings
+                const allSettings = [
+                    ...settings.basic,
+                    ...settings.extended,
+                    ...settings.umlauts,
+                    ...settings.diphthongs,
+                    ...settings.combinations,
+                    ...settings.special
+                ];
+
+                document.querySelectorAll('.letter-checkbox input[type="checkbox"]').forEach(cb => {
+                    if (allSettings.includes(cb.value)) {
+                        cb.checked = true;
+                    }
+                });
+
+                // Update group checkboxes
+                document.querySelectorAll('.letter-grid').forEach(grid => {
+                    updateGroupCheckbox(grid);
+                });
+
+                console.log('Buchstaben-Einstellungen geladen:', settings);
+            } catch (e) {
+                console.warn('Konnte Einstellungen nicht laden:', e);
+            }
+        }
+
+        function getAllowedLetters() {
+            const allowed = [];
+            document.querySelectorAll('.letter-checkbox input[type="checkbox"]:checked').forEach(cb => {
+                allowed.push(cb.value);
+            });
+            return allowed;
+        }
+
+        function isWordAllowed(word) {
+            const allowedLetters = getAllowedLetters();
+            if (allowedLetters.length === 0) {
+                // If no letters selected, allow all words
+                return true;
+            }
+
+            const lowerWord = word.toLowerCase();
+
+            // Sort combinations by length (longest first) to check multi-char combinations first
+            const sortedAllowed = allowedLetters.sort((a, b) => b.length - a.length);
+
+            // Build a regex pattern that matches any character or combination NOT in allowed list
+            let remaining = lowerWord;
+
+            // Remove all allowed combinations/letters from the word
+            for (const allowed of sortedAllowed) {
+                remaining = remaining.split(allowed).join('');
+            }
+
+            // If anything remains, the word contains disallowed characters
+            return remaining.length === 0;
+        }
+
         // ==================== INITIALIZE ====================
         function checkLocalStorage() {
             try {
@@ -959,7 +1333,7 @@
         // Initialize app
         (function init() {
             console.log('Blitz Lesen App wird geladen...');
-            
+
             // Load words from word_db.js
             if (typeof WORD_DATABASE !== 'undefined') {
                 WORDS = WORD_DATABASE;
@@ -974,7 +1348,7 @@
                 console.error('WORD_DATABASE nicht gefunden! Stelle sicher, dass word_db.js geladen wurde.');
                 alert('Fehler: Wort-Datenbank konnte nicht geladen werden. Bitte stelle sicher, dass die Datei word_db.js im gleichen Ordner liegt.');
             }
-            
+
             // Check localStorage
             const storageAvailable = checkLocalStorage();
             if (!storageAvailable) {
@@ -982,7 +1356,10 @@
             } else {
                 console.log('LocalStorage verfügbar - Ranglisten werden gespeichert.');
             }
-            
+
+            // Load letter settings
+            loadLetterSettings();
+
             // Register Service Worker for PWA
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
@@ -995,7 +1372,7 @@
                         });
                 });
             }
-            
+
             console.log('✅ App bereit!');
         })();
     </script>
