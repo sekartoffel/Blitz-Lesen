@@ -1176,11 +1176,20 @@
         }
 
         // ==================== LETTER SETTINGS ====================
-        // Group checkbox functionality
+        // Group checkbox functionality with correct ID mapping
+        const groupIdMapping = {
+            'checkBasic': 'basicLetters',
+            'checkExtended': 'extendedLetters',
+            'checkUmlauts': 'umlautLetters',
+            'checkDiphthongs': 'diphthongLetters',
+            'checkCombinations': 'combinationLetters',
+            'checkSpecial': 'specialLetters'
+        };
+
         document.querySelectorAll('.group-checkbox').forEach(groupCheckbox => {
             groupCheckbox.addEventListener('change', (e) => {
-                const groupId = e.target.id.replace('check', '').toLowerCase();
-                const container = document.getElementById(groupId + 'Letters');
+                const containerId = groupIdMapping[e.target.id];
+                const container = document.getElementById(containerId);
                 if (container) {
                     const checkboxes = container.querySelectorAll('input[type="checkbox"]');
                     checkboxes.forEach(cb => {
@@ -1200,8 +1209,18 @@
         });
 
         function updateGroupCheckbox(grid) {
-            const groupId = grid.id.replace('Letters', '');
-            const groupCheckbox = document.getElementById('check' + groupId.charAt(0).toUpperCase() + groupId.slice(1));
+            // Reverse mapping: find the checkbox ID for this container
+            const reverseMapping = {
+                'basicLetters': 'checkBasic',
+                'extendedLetters': 'checkExtended',
+                'umlautLetters': 'checkUmlauts',
+                'diphthongLetters': 'checkDiphthongs',
+                'combinationLetters': 'checkCombinations',
+                'specialLetters': 'checkSpecial'
+            };
+
+            const groupCheckboxId = reverseMapping[grid.id];
+            const groupCheckbox = document.getElementById(groupCheckboxId);
 
             if (groupCheckbox) {
                 const checkboxes = Array.from(grid.querySelectorAll('input[type="checkbox"]'));
@@ -1303,19 +1322,34 @@
 
             const lowerWord = word.toLowerCase();
 
-            // Sort combinations by length (longest first) to check multi-char combinations first
-            const sortedAllowed = allowedLetters.sort((a, b) => b.length - a.length);
+            // Define all possible combinations we check for
+            const knownCombinations = ['sch', 'ch', 'st', 'sp', 'pf', 'ck', 'ng', 'qu', 'tz', 'ei', 'au', 'eu', 'äu', 'ai'];
 
-            // Build a regex pattern that matches any character or combination NOT in allowed list
-            let remaining = lowerWord;
-
-            // Remove all allowed combinations/letters from the word
-            for (const allowed of sortedAllowed) {
-                remaining = remaining.split(allowed).join('');
+            // Check if word contains any disallowed combinations
+            for (const combo of knownCombinations) {
+                if (lowerWord.includes(combo) && !allowedLetters.includes(combo)) {
+                    // Word contains a combination that is not allowed
+                    return false;
+                }
             }
 
-            // If anything remains, the word contains disallowed characters
-            return remaining.length === 0;
+            // Now check individual letters
+            // Remove all allowed combinations first (longest first to avoid partial matches)
+            let remaining = lowerWord;
+            const sortedCombos = allowedLetters.filter(l => l.length > 1).sort((a, b) => b.length - a.length);
+
+            for (const combo of sortedCombos) {
+                remaining = remaining.split(combo).join('');
+            }
+
+            // Check if all remaining single characters are allowed
+            for (const char of remaining) {
+                if (!allowedLetters.includes(char)) {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         // ==================== INITIALIZE ====================
