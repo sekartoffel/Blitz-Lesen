@@ -25,6 +25,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playwrite+DE+Grund:wght@400&display=swap" rel="stylesheet">
 
+    <!-- Supabase Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script src="word_db.js"></script>
     <style>
         * {
@@ -817,6 +820,21 @@
     </div>
 
     <script>
+        // ==================== SUPABASE CONFIGURATION ====================
+        // IMPORTANT: Replace these with your Supabase project credentials
+        // Get them from: https://app.supabase.com/project/_/settings/api
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';  // e.g., 'https://xxxxx.supabase.co'
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';  // Long JWT token
+
+        // Initialize Supabase client
+        let supabase = null;
+        if (SUPABASE_URL !== 'YOUR_SUPABASE_URL_HERE' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY_HERE') {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('✅ Supabase client initialized');
+        } else {
+            console.warn('⚠️ Supabase not configured. Leaderboard will use localStorage only.');
+        }
+
         // ==================== WORD DATABASE ====================
         // Words are loaded from word_db.js
         let WORDS = null;
@@ -1053,11 +1071,44 @@
         }
 
         // ==================== LEADERBOARD ====================
-        function saveScore(name, time, syllables) {
+        async function saveScore(name, time, syllables) {
+            const scoreData = {
+                player_name: name,
+                time: time,
+                syllables: syllables,
+                words_read: gameState.wordsRead,
+                words_skipped: gameState.wordsSkipped,
+                game_type: gameState.gameType
+            };
+
+            // Try Supabase first
+            if (supabase) {
+                try {
+                    const { data, error } = await supabase
+                        .from('leaderboard')
+                        .insert([scoreData]);
+
+                    if (error) {
+                        console.error('Supabase error:', error);
+                        saveScoreToLocalStorage(name, time, syllables);
+                    } else {
+                        console.log('✅ Score saved to Supabase');
+                    }
+                } catch (e) {
+                    console.error('Failed to save to Supabase:', e);
+                    saveScoreToLocalStorage(name, time, syllables);
+                }
+            } else {
+                // Fallback to localStorage
+                saveScoreToLocalStorage(name, time, syllables);
+            }
+        }
+
+        function saveScoreToLocalStorage(name, time, syllables) {
             try {
                 const key = `leaderboard_${syllables}`;
                 let leaderboard = [];
-                
+
                 try {
                     const stored = localStorage.getItem(key);
                     if (stored) {
@@ -1066,20 +1117,21 @@
                 } catch (e) {
                     console.warn('Konnte gespeicherte Rangliste nicht laden:', e);
                 }
-                
+
                 const newEntry = {
                     name: name,
                     time: time,
                     date: new Date().toLocaleDateString('de-DE'),
                     syllables: syllables
                 };
-                
+
                 leaderboard.push(newEntry);
                 leaderboard.sort((a, b) => a.time - b.time);
                 leaderboard = leaderboard.slice(0, 5);
-                
+
                 try {
                     localStorage.setItem(key, JSON.stringify(leaderboard));
+                    console.log('✅ Score saved to localStorage');
                 } catch (e) {
                     console.warn('Konnte Rangliste nicht speichern:', e);
                 }
@@ -1088,11 +1140,39 @@
             }
         }
 
-        function displayLeaderboard(syllables) {
+        async function displayLeaderboard(syllables) {
+            // Try Supabase first
+            if (supabase) {
+                try {
+                    const { data, error } = await supabase
+                        .from('leaderboard')
+                        .select('*')
+                        .eq('syllables', syllables)
+                        .order('time', { ascending: true })
+                        .limit(5);
+
+                    if (error) {
+                        console.error('Supabase error:', error);
+                        displayLeaderboardFromLocalStorage(syllables);
+                    } else {
+                        renderLeaderboardTable(data);
+                        console.log('✅ Leaderboard loaded from Supabase');
+                    }
+                } catch (e) {
+                    console.error('Failed to load from Supabase:', e);
+                    displayLeaderboardFromLocalStorage(syllables);
+                }
+            } else {
+                // Fallback to localStorage
+                displayLeaderboardFromLocalStorage(syllables);
+            }
+        }
+
+        function displayLeaderboardFromLocalStorage(syllables) {
             try {
                 const key = `leaderboard_${syllables}`;
                 let leaderboard = [];
-                
+
                 try {
                     const stored = localStorage.getItem(key);
                     if (stored) {
@@ -1101,31 +1181,45 @@
                 } catch (e) {
                     console.warn('Konnte Rangliste nicht laden:', e);
                 }
-                
-                elements.leaderboardBody.innerHTML = '';
-                
-                if (leaderboard.length === 0) {
-                    elements.leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Noch keine Einträge</td></tr>';
-                    return;
-                }
-                
-                leaderboard.forEach((entry, index) => {
-                    const row = document.createElement('tr');
-                    const rankClass = index < 3 ? `rank-${index + 1}` : '';
-                    
-                    row.innerHTML = `
-                        <td class="rank ${rankClass}">${index + 1}.</td>
-                        <td>${entry.name}</td>
-                        <td><strong>${entry.time}s</strong></td>
-                        <td>${entry.date}</td>
-                    `;
-                    
-                    elements.leaderboardBody.appendChild(row);
-                });
+
+                renderLeaderboardTable(leaderboard);
+                console.log('✅ Leaderboard loaded from localStorage');
             } catch (e) {
                 console.error('Fehler beim Anzeigen der Rangliste:', e);
                 elements.leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Rangliste konnte nicht geladen werden</td></tr>';
             }
+        }
+
+        function renderLeaderboardTable(leaderboard) {
+            elements.leaderboardBody.innerHTML = '';
+
+            if (!leaderboard || leaderboard.length === 0) {
+                elements.leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Noch keine Einträge</td></tr>';
+                return;
+            }
+
+            leaderboard.forEach((entry, index) => {
+                const row = document.createElement('tr');
+                const rankClass = index < 3 ? `rank-${index + 1}` : '';
+
+                // Handle both Supabase format (created_at) and localStorage format (date)
+                let displayDate = entry.date;
+                if (entry.created_at) {
+                    displayDate = new Date(entry.created_at).toLocaleDateString('de-DE');
+                }
+
+                // Handle both formats for name field
+                const playerName = entry.player_name || entry.name;
+
+                row.innerHTML = `
+                    <td class="rank ${rankClass}">${index + 1}.</td>
+                    <td>${playerName}</td>
+                    <td><strong>${entry.time}s</strong></td>
+                    <td>${displayDate}</td>
+                `;
+
+                elements.leaderboardBody.appendChild(row);
+            });
         }
 
         // ==================== RESULT BUTTONS ====================
@@ -1152,16 +1246,37 @@
             }
         });
 
-        function resetLeaderboard(syllables) {
+        async function resetLeaderboard(syllables) {
+            // Try Supabase first
+            if (supabase) {
+                try {
+                    const { error } = await supabase
+                        .from('leaderboard')
+                        .delete()
+                        .eq('syllables', syllables);
+
+                    if (error) {
+                        console.error('Supabase error:', error);
+                        alert('Fehler beim Zurücksetzen der Rangliste in Supabase.');
+                    } else {
+                        console.log(`✅ Supabase leaderboard for ${syllables} syllables reset`);
+                    }
+                } catch (e) {
+                    console.error('Failed to reset Supabase leaderboard:', e);
+                }
+            }
+
+            // Also clear localStorage
             try {
                 const key = `leaderboard_${syllables}`;
                 localStorage.removeItem(key);
-                displayLeaderboard(syllables);
-                console.log(`Rangliste für ${syllables} Silbe(n) wurde zurückgesetzt.`);
+                console.log(`✅ localStorage leaderboard for ${syllables} syllables reset`);
             } catch (e) {
-                console.error('Fehler beim Zurücksetzen der Rangliste:', e);
-                alert('Rangliste konnte nicht zurückgesetzt werden.');
+                console.error('Fehler beim Zurücksetzen der localStorage Rangliste:', e);
             }
+
+            // Refresh display
+            displayLeaderboard(syllables);
         }
 
         function updateLeaderboardTabs(syllables) {
