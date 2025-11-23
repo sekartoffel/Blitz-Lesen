@@ -62,16 +62,19 @@ CREATE POLICY "Authenticated users can manage words"
 -- ==================== HELPFUL VIEWS ====================
 -- View for top 5 leaderboard per syllable count
 CREATE OR REPLACE VIEW top_leaderboard AS
-SELECT
-  id,
-  player_name,
-  time,
-  syllables,
-  words_read,
-  game_type,
-  TO_CHAR(created_at, 'DD.MM.YYYY') as date,
-  ROW_NUMBER() OVER (PARTITION BY syllables ORDER BY time ASC) as rank
-FROM leaderboard
+SELECT *
+FROM (
+  SELECT
+    id,
+    player_name,
+    time,
+    syllables,
+    words_read,
+    game_type,
+    TO_CHAR(created_at, 'DD.MM.YYYY') as date,
+    ROW_NUMBER() OVER (PARTITION BY syllables ORDER BY time ASC) as rank
+  FROM leaderboard
+) ranked
 WHERE rank <= 5;
 
 -- ==================== SEED DATA (OPTIONAL) ====================
