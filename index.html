@@ -1182,7 +1182,7 @@
             }
 
             // Save score and wait for completion
-            await saveScore(gameState.playerName, finalTime, gameState.syllables, gameState.groupName, gameState.wordsRead, gameState.gameType);
+            await saveScore(gameState.playerName, finalTime, gameState.syllables, gameState.groupName, gameState.wordsRead, gameState.wordsSkipped, gameState.gameType);
 
             // Update leaderboard display
             updateLeaderboardTabs(gameState.syllables, gameState.groupName);
@@ -1192,7 +1192,7 @@
         }
 
         // ==================== LEADERBOARD ====================
-        async function saveScore(name, time, syllables, group, wordsRead, gameType) {
+        async function saveScore(name, time, syllables, group, wordsRead, wordsSkipped, gameType) {
             if (!supabase) {
                 console.error('Supabase not configured - score not saved');
                 alert('Leaderboard ist nicht konfiguriert. Punktzahl konnte nicht gespeichert werden.');
@@ -1209,6 +1209,7 @@
                             syllables: syllables,
                             group_name: group, // null for "weltweit", or the group name
                             words_read: wordsRead,
+                            words_skipped: wordsSkipped,
                             game_type: gameType
                         }
                     ]);
