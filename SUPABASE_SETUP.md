@@ -1,10 +1,25 @@
 # Supabase Setup for Blitz Lesen
 
-## Database Schema
+## Migration: Add Group Support to Existing Leaderboard
 
-Create a table named `leaderboard` with the following columns:
+If you already have a `leaderboard` table, run this migration to add group support:
 
-### SQL Schema
+### Migration SQL
+
+```sql
+-- Add group_name column to existing leaderboard table
+ALTER TABLE leaderboard ADD COLUMN IF NOT EXISTS group_name TEXT;
+
+-- Add index for better query performance on group filtering
+CREATE INDEX IF NOT EXISTS idx_leaderboard_group ON leaderboard(group_name);
+
+-- Add composite index for optimal group + syllables queries
+CREATE INDEX IF NOT EXISTS idx_leaderboard_composite ON leaderboard(syllables, group_name, time);
+```
+
+## Full Schema (For New Projects)
+
+If you're creating the table from scratch:
 
 ```sql
 CREATE TABLE leaderboard (
