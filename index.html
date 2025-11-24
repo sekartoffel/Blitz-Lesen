@@ -338,23 +338,6 @@
             box-shadow: 0 0 8px rgba(102, 126, 234, 0.3);
         }
 
-        .btn-reset-icon {
-            padding: 8px 10px;
-            font-size: 1.2em;
-            border: 2px solid #dc3545;
-            background: white;
-            color: #dc3545;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            line-height: 1;
-        }
-
-        .btn-reset-icon:hover {
-            background: #dc3545;
-            color: white;
-        }
-
         .game-type-buttons {
             display: flex;
             gap: 10px;
@@ -600,6 +583,12 @@
             </div>
 
             <div class="input-group">
+                <label for="groupName">Gruppe (optional):</label>
+                <input type="text" id="groupName" placeholder="z.B. Familie Schmidt, Klasse 5A..." maxlength="30">
+                <small style="color: #666; font-size: 0.9em; margin-top: 5px; display: block;">Leer lassen für weltweite Rangliste</small>
+            </div>
+
+            <div class="input-group">
                 <label>Wie viele Silben?</label>
                 <div class="syllable-buttons">
                     <button class="syllable-btn" data-syllables="1">1</button>
@@ -629,6 +618,10 @@
 
             <button class="btn btn-secondary" id="settingsBtn" style="margin-top: 10px;">
                 <span class="emoji">⚙️</span> SCHWIERIGKEIT EINSTELLEN
+            </button>
+
+            <button class="btn btn-secondary" id="viewLeaderboardBtn" style="margin-top: 10px;">
+                <span class="emoji">🏆</span> RANGLISTE ANSEHEN
             </button>
         </div>
 
@@ -744,6 +737,42 @@
             </div>
         </div>
 
+        <!-- Leaderboard View Screen -->
+        <div id="leaderboardViewScreen" class="screen">
+            <h2 style="color: #667eea; margin-bottom: 20px;">🏆 Rangliste</h2>
+
+            <div class="leaderboard">
+                <div class="leaderboard-controls">
+                    <select class="syllable-select" id="viewSyllableSelect">
+                        <option value="1">1 Silbe</option>
+                        <option value="2">2 Silben</option>
+                        <option value="3">3 Silben</option>
+                        <option value="4">4 Silben</option>
+                    </select>
+                    <select class="syllable-select" id="viewGroupSelect" style="flex: 1; max-width: 300px;">
+                        <option value="weltweit">Weltweit</option>
+                    </select>
+                </div>
+                <table class="leaderboard-table" style="margin-top: 15px;">
+                    <thead>
+                        <tr>
+                            <th>Platz</th>
+                            <th>Name</th>
+                            <th>Zeit</th>
+                            <th>Datum</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardViewBody">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <button class="btn btn-secondary" id="backFromLeaderboardBtn" style="margin-top: 30px;">
+                <span class="emoji">←</span> ZURÜCK
+            </button>
+        </div>
+
         <!-- Game Screen -->
         <div id="gameScreen" class="screen">
             <div class="game-header">
@@ -788,7 +817,9 @@
                         <option value="3">3 Silben</option>
                         <option value="4">4 Silben</option>
                     </select>
-                    <button class="btn-reset-icon" id="resetLeaderboardBtn" title="Rangliste zurücksetzen">🗑️</button>
+                    <select class="syllable-select" id="groupSelect" style="flex: 1; max-width: 300px;">
+                        <option value="weltweit">Weltweit</option>
+                    </select>
                 </div>
                 <table class="leaderboard-table">
                     <thead>
@@ -824,6 +855,7 @@
         // ==================== GAME STATE ====================
         let gameState = {
             playerName: '',
+            groupName: '',
             syllables: null,
             gameType: null,
             currentWordIndex: 0,
@@ -840,15 +872,19 @@
         const screens = {
             start: document.getElementById('startScreen'),
             settings: document.getElementById('settingsScreen'),
+            leaderboardView: document.getElementById('leaderboardViewScreen'),
             game: document.getElementById('gameScreen'),
             result: document.getElementById('resultScreen')
         };
 
         const elements = {
             playerName: document.getElementById('playerName'),
+            groupName: document.getElementById('groupName'),
             startBtn: document.getElementById('startBtn'),
             settingsBtn: document.getElementById('settingsBtn'),
+            viewLeaderboardBtn: document.getElementById('viewLeaderboardBtn'),
             backToStartBtn: document.getElementById('backToStartBtn'),
+            backFromLeaderboardBtn: document.getElementById('backFromLeaderboardBtn'),
             saveSettingsBtn: document.getElementById('saveSettingsBtn'),
             currentWord: document.getElementById('currentWord'),
             wordDisplay: document.getElementById('wordDisplay'),
@@ -861,12 +897,63 @@
             leaderboardBody: document.getElementById('leaderboardBody'),
             playAgainBtn: document.getElementById('playAgainBtn'),
             newSettingsBtn: document.getElementById('newSettingsBtn'),
-            resetLeaderboardBtn: document.getElementById('resetLeaderboardBtn'),
-            syllableSelect: document.getElementById('syllableSelect')
+            syllableSelect: document.getElementById('syllableSelect'),
+            groupSelect: document.getElementById('groupSelect'),
+            viewSyllableSelect: document.getElementById('viewSyllableSelect'),
+            viewGroupSelect: document.getElementById('viewGroupSelect'),
+            leaderboardViewBody: document.getElementById('leaderboardViewBody')
         };
 
-        // Track currently displayed leaderboard syllables
+        // Track currently displayed leaderboard syllables and group
         let currentLeaderboardSyllables = 1;
+        let currentLeaderboardGroup = 'weltweit';
+
+        // ==================== GROUP HELPERS ====================
+        function normalizeGroupName(groupName) {
+            if (!groupName || groupName.trim() === '') {
+                return 'weltweit';
+            }
+            return groupName.trim().toLowerCase();
+        }
+
+        function getAllGroups() {
+            const groups = new Set(['weltweit']);
+
+            // Scan all leaderboards for groups
+            for (let syllables = 1; syllables <= 4; syllables++) {
+                const key = `leaderboard_${syllables}`;
+                try {
+                    const stored = localStorage.getItem(key);
+                    if (stored) {
+                        const leaderboard = JSON.parse(stored);
+                        leaderboard.forEach(entry => {
+                            if (entry.group) {
+                                groups.add(entry.group);
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.warn(`Could not load groups from ${key}:`, e);
+                }
+            }
+
+            return Array.from(groups).sort();
+        }
+
+        function populateGroupDropdown(selectElement, currentGroup = 'weltweit') {
+            const groups = getAllGroups();
+            selectElement.innerHTML = '';
+
+            groups.forEach(group => {
+                const option = document.createElement('option');
+                option.value = group;
+                option.textContent = group === 'weltweit' ? 'Weltweit' : group.charAt(0).toUpperCase() + group.slice(1);
+                if (group === currentGroup) {
+                    option.selected = true;
+                }
+                selectElement.appendChild(option);
+            });
+        }
 
         // ==================== SETTINGS NAVIGATION ====================
         elements.settingsBtn.addEventListener('click', () => {
@@ -879,6 +966,17 @@
 
         elements.saveSettingsBtn.addEventListener('click', () => {
             saveLetterSettings();
+            showScreen('start');
+        });
+
+        elements.viewLeaderboardBtn.addEventListener('click', () => {
+            populateGroupDropdown(elements.viewGroupSelect, currentLeaderboardGroup);
+            elements.viewSyllableSelect.value = currentLeaderboardSyllables;
+            displayLeaderboardView(currentLeaderboardSyllables, currentLeaderboardGroup);
+            showScreen('leaderboardView');
+        });
+
+        elements.backFromLeaderboardBtn.addEventListener('click', () => {
             showScreen('start');
         });
 
@@ -927,6 +1025,15 @@
             }
 
             gameState.playerName = elements.playerName.value.trim();
+            gameState.groupName = normalizeGroupName(elements.groupName.value);
+
+            // Save last used group name
+            try {
+                localStorage.setItem('lastGroupName', elements.groupName.value.trim());
+            } catch (e) {
+                console.warn('Could not save last group name:', e);
+            }
+
             gameState.currentWordIndex = 0;
             gameState.wordsRead = 0;
             gameState.wordsSkipped = 0;
@@ -1035,29 +1142,30 @@
 
             const penalty = gameState.wordsSkipped * 3;
             const finalTime = gameState.elapsedTime + penalty;
-            
+
             elements.wordsRead.textContent = gameState.wordsRead;
             elements.finalTime.textContent = finalTime;
-            
+
             if (penalty > 0) {
                 elements.penaltyInfo.style.display = 'block';
                 elements.penaltySeconds.textContent = penalty;
             } else {
                 elements.penaltyInfo.style.display = 'none';
             }
-            
-            saveScore(gameState.playerName, finalTime, gameState.syllables);
-            updateLeaderboardTabs(gameState.syllables);
-            displayLeaderboard(gameState.syllables);
+
+            saveScore(gameState.playerName, finalTime, gameState.syllables, gameState.groupName);
+            updateLeaderboardTabs(gameState.syllables, gameState.groupName);
+            populateGroupDropdown(elements.groupSelect, gameState.groupName);
+            displayLeaderboard(gameState.syllables, gameState.groupName);
             showScreen('result');
         }
 
         // ==================== LEADERBOARD ====================
-        function saveScore(name, time, syllables) {
+        function saveScore(name, time, syllables, group) {
             try {
                 const key = `leaderboard_${syllables}`;
                 let leaderboard = [];
-                
+
                 try {
                     const stored = localStorage.getItem(key);
                     if (stored) {
@@ -1066,18 +1174,19 @@
                 } catch (e) {
                     console.warn('Konnte gespeicherte Rangliste nicht laden:', e);
                 }
-                
+
                 const newEntry = {
                     name: name,
                     time: time,
                     date: new Date().toLocaleDateString('de-DE'),
-                    syllables: syllables
+                    syllables: syllables,
+                    group: group || 'weltweit'
                 };
-                
+
                 leaderboard.push(newEntry);
                 leaderboard.sort((a, b) => a.time - b.time);
-                leaderboard = leaderboard.slice(0, 5);
-                
+                // Don't limit here - we'll filter and limit when displaying
+
                 try {
                     localStorage.setItem(key, JSON.stringify(leaderboard));
                 } catch (e) {
@@ -1088,11 +1197,11 @@
             }
         }
 
-        function displayLeaderboard(syllables) {
+        function displayLeaderboard(syllables, group = 'weltweit') {
             try {
                 const key = `leaderboard_${syllables}`;
                 let leaderboard = [];
-                
+
                 try {
                     const stored = localStorage.getItem(key);
                     if (stored) {
@@ -1101,30 +1210,80 @@
                 } catch (e) {
                     console.warn('Konnte Rangliste nicht laden:', e);
                 }
-                
+
+                // Filter by group and limit to top 5
+                const filteredLeaderboard = leaderboard
+                    .filter(entry => (entry.group || 'weltweit') === group)
+                    .slice(0, 5);
+
                 elements.leaderboardBody.innerHTML = '';
-                
-                if (leaderboard.length === 0) {
+
+                if (filteredLeaderboard.length === 0) {
                     elements.leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Noch keine Einträge</td></tr>';
                     return;
                 }
-                
-                leaderboard.forEach((entry, index) => {
+
+                filteredLeaderboard.forEach((entry, index) => {
                     const row = document.createElement('tr');
                     const rankClass = index < 3 ? `rank-${index + 1}` : '';
-                    
+
                     row.innerHTML = `
                         <td class="rank ${rankClass}">${index + 1}.</td>
                         <td>${entry.name}</td>
                         <td><strong>${entry.time}s</strong></td>
                         <td>${entry.date}</td>
                     `;
-                    
+
                     elements.leaderboardBody.appendChild(row);
                 });
             } catch (e) {
                 console.error('Fehler beim Anzeigen der Rangliste:', e);
                 elements.leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Rangliste konnte nicht geladen werden</td></tr>';
+            }
+        }
+
+        function displayLeaderboardView(syllables, group = 'weltweit') {
+            try {
+                const key = `leaderboard_${syllables}`;
+                let leaderboard = [];
+
+                try {
+                    const stored = localStorage.getItem(key);
+                    if (stored) {
+                        leaderboard = JSON.parse(stored);
+                    }
+                } catch (e) {
+                    console.warn('Konnte Rangliste nicht laden:', e);
+                }
+
+                // Filter by group and limit to top 5
+                const filteredLeaderboard = leaderboard
+                    .filter(entry => (entry.group || 'weltweit') === group)
+                    .slice(0, 5);
+
+                elements.leaderboardViewBody.innerHTML = '';
+
+                if (filteredLeaderboard.length === 0) {
+                    elements.leaderboardViewBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Noch keine Einträge</td></tr>';
+                    return;
+                }
+
+                filteredLeaderboard.forEach((entry, index) => {
+                    const row = document.createElement('tr');
+                    const rankClass = index < 3 ? `rank-${index + 1}` : '';
+
+                    row.innerHTML = `
+                        <td class="rank ${rankClass}">${index + 1}.</td>
+                        <td>${entry.name}</td>
+                        <td><strong>${entry.time}s</strong></td>
+                        <td>${entry.date}</td>
+                    `;
+
+                    elements.leaderboardViewBody.appendChild(row);
+                });
+            } catch (e) {
+                console.error('Fehler beim Anzeigen der Rangliste:', e);
+                elements.leaderboardViewBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Rangliste konnte nicht geladen werden</td></tr>';
             }
         }
 
@@ -1138,34 +1297,37 @@
         });
 
         // ==================== LEADERBOARD CONTROLS ====================
-        // Syllable dropdown for switching between leaderboards
+        // Result screen - syllable dropdown
         elements.syllableSelect.addEventListener('change', () => {
             const syllables = parseInt(elements.syllableSelect.value);
             currentLeaderboardSyllables = syllables;
-            displayLeaderboard(syllables);
+            displayLeaderboard(syllables, currentLeaderboardGroup);
         });
 
-        // Reset leaderboard button
-        elements.resetLeaderboardBtn.addEventListener('click', () => {
-            if (confirm(`Möchtest du wirklich die Rangliste für ${currentLeaderboardSyllables} Silbe(n) zurücksetzen? Dies kann nicht rückgängig gemacht werden!`)) {
-                resetLeaderboard(currentLeaderboardSyllables);
-            }
+        // Result screen - group dropdown
+        elements.groupSelect.addEventListener('change', () => {
+            const group = elements.groupSelect.value;
+            currentLeaderboardGroup = group;
+            displayLeaderboard(currentLeaderboardSyllables, group);
         });
 
-        function resetLeaderboard(syllables) {
-            try {
-                const key = `leaderboard_${syllables}`;
-                localStorage.removeItem(key);
-                displayLeaderboard(syllables);
-                console.log(`Rangliste für ${syllables} Silbe(n) wurde zurückgesetzt.`);
-            } catch (e) {
-                console.error('Fehler beim Zurücksetzen der Rangliste:', e);
-                alert('Rangliste konnte nicht zurückgesetzt werden.');
-            }
-        }
-
-        function updateLeaderboardTabs(syllables) {
+        // Leaderboard view screen - syllable dropdown
+        elements.viewSyllableSelect.addEventListener('change', () => {
+            const syllables = parseInt(elements.viewSyllableSelect.value);
             currentLeaderboardSyllables = syllables;
+            displayLeaderboardView(syllables, currentLeaderboardGroup);
+        });
+
+        // Leaderboard view screen - group dropdown
+        elements.viewGroupSelect.addEventListener('change', () => {
+            const group = elements.viewGroupSelect.value;
+            currentLeaderboardGroup = group;
+            displayLeaderboardView(currentLeaderboardSyllables, group);
+        });
+
+        function updateLeaderboardTabs(syllables, group = 'weltweit') {
+            currentLeaderboardSyllables = syllables;
+            currentLeaderboardGroup = group;
             elements.syllableSelect.value = syllables;
         }
 
@@ -1393,6 +1555,17 @@
 
             // Load letter settings
             loadLetterSettings();
+
+            // Load last used group name
+            try {
+                const lastGroupName = localStorage.getItem('lastGroupName');
+                if (lastGroupName) {
+                    elements.groupName.value = lastGroupName;
+                    console.log('Letzte Gruppe geladen:', lastGroupName);
+                }
+            } catch (e) {
+                console.warn('Konnte letzte Gruppe nicht laden:', e);
+            }
 
             // Register Service Worker for PWA
             if ('serviceWorker' in navigator) {
