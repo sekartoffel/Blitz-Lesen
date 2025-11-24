@@ -1204,7 +1204,7 @@
                     .from('leaderboard')
                     .insert([
                         {
-                            name: name,
+                            player_name: name,
                             time: time,
                             syllables: syllables,
                             group_name: group // null for "weltweit", or the group name
@@ -1265,7 +1265,7 @@
 
                     row.innerHTML = `
                         <td class="rank ${rankClass}">${index + 1}.</td>
-                        <td>${entry.name}</td>
+                        <td>${entry.player_name}</td>
                         <td><strong>${entry.time}s</strong></td>
                         <td>${date}</td>
                     `;
@@ -1320,7 +1320,7 @@
 
                     row.innerHTML = `
                         <td class="rank ${rankClass}">${index + 1}.</td>
-                        <td>${entry.name}</td>
+                        <td>${entry.player_name}</td>
                         <td><strong>${entry.time}s</strong></td>
                         <td>${date}</td>
                     `;
