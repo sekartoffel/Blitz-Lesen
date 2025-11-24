@@ -1261,7 +1261,7 @@
                 data.forEach((entry, index) => {
                     const row = document.createElement('tr');
                     const rankClass = index < 3 ? `rank-${index + 1}` : '';
-                    const date = new Date(entry.date).toLocaleDateString('de-DE');
+                    const date = new Date(entry.created_at).toLocaleDateString('de-DE');
 
                     row.innerHTML = `
                         <td class="rank ${rankClass}">${index + 1}.</td>
@@ -1316,7 +1316,7 @@
                 data.forEach((entry, index) => {
                     const row = document.createElement('tr');
                     const rankClass = index < 3 ? `rank-${index + 1}` : '';
-                    const date = new Date(entry.date).toLocaleDateString('de-DE');
+                    const date = new Date(entry.created_at).toLocaleDateString('de-DE');
 
                     row.innerHTML = `
                         <td class="rank ${rankClass}">${index + 1}.</td>
