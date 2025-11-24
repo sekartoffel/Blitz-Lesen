@@ -26,6 +26,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Playwrite+DE+Grund:wght@400&display=swap" rel="stylesheet">
 
     <script src="word_db.js"></script>
+
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
         * {
             margin: 0;
@@ -848,6 +852,20 @@
     </div>
 
     <script>
+        // ==================== SUPABASE CONFIGURATION ====================
+        // TODO: Replace with your Supabase project URL and API key
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+        // Initialize Supabase client
+        let supabase = null;
+        if (typeof window.supabase !== 'undefined' && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('✅ Supabase initialized');
+        } else {
+            console.warn('⚠️ Supabase not configured - leaderboard features will not work');
+        }
+
         // ==================== WORD DATABASE ====================
         // Words are loaded from word_db.js
         let WORDS = null;
@@ -910,38 +928,49 @@
 
         // ==================== GROUP HELPERS ====================
         function normalizeGroupName(groupName) {
-            if (!groupName || groupName.trim() === '') {
-                return 'weltweit';
+            // Return null for empty/weltweit to indicate "show all"
+            if (!groupName || groupName.trim() === '' || groupName.trim().toLowerCase() === 'weltweit') {
+                return null;
             }
             return groupName.trim().toLowerCase();
         }
 
-        function getAllGroups() {
+        async function getAllGroups() {
             const groups = new Set(['weltweit']);
 
-            // Scan all leaderboards for groups
-            for (let syllables = 1; syllables <= 4; syllables++) {
-                const key = `leaderboard_${syllables}`;
-                try {
-                    const stored = localStorage.getItem(key);
-                    if (stored) {
-                        const leaderboard = JSON.parse(stored);
-                        leaderboard.forEach(entry => {
-                            if (entry.group) {
-                                groups.add(entry.group);
-                            }
-                        });
-                    }
-                } catch (e) {
-                    console.warn(`Could not load groups from ${key}:`, e);
+            if (!supabase) {
+                console.warn('Supabase not configured');
+                return Array.from(groups).sort();
+            }
+
+            try {
+                // Get distinct group names from Supabase
+                const { data, error } = await supabase
+                    .from('leaderboard')
+                    .select('group_name')
+                    .not('group_name', 'is', null);
+
+                if (error) {
+                    console.error('Error fetching groups from Supabase:', error);
+                    return Array.from(groups).sort();
                 }
+
+                if (data) {
+                    data.forEach(entry => {
+                        if (entry.group_name) {
+                            groups.add(entry.group_name);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error('Exception fetching groups:', e);
             }
 
             return Array.from(groups).sort();
         }
 
-        function populateGroupDropdown(selectElement, currentGroup = 'weltweit') {
-            const groups = getAllGroups();
+        async function populateGroupDropdown(selectElement, currentGroup = 'weltweit') {
+            const groups = await getAllGroups();
             selectElement.innerHTML = '';
 
             groups.forEach(group => {
@@ -969,10 +998,10 @@
             showScreen('start');
         });
 
-        elements.viewLeaderboardBtn.addEventListener('click', () => {
-            populateGroupDropdown(elements.viewGroupSelect, currentLeaderboardGroup);
+        elements.viewLeaderboardBtn.addEventListener('click', async () => {
+            await populateGroupDropdown(elements.viewGroupSelect, currentLeaderboardGroup);
             elements.viewSyllableSelect.value = currentLeaderboardSyllables;
-            displayLeaderboardView(currentLeaderboardSyllables, currentLeaderboardGroup);
+            await displayLeaderboardView(currentLeaderboardSyllables, currentLeaderboardGroup);
             showScreen('leaderboardView');
         });
 
@@ -1131,7 +1160,7 @@
         });
 
         // ==================== END GAME ====================
-        function endGame() {
+        async function endGame() {
             stopTimer();
 
             // Clear any pending word hide timeout
@@ -1153,137 +1182,155 @@
                 elements.penaltyInfo.style.display = 'none';
             }
 
-            saveScore(gameState.playerName, finalTime, gameState.syllables, gameState.groupName);
+            // Save score and wait for completion
+            await saveScore(gameState.playerName, finalTime, gameState.syllables, gameState.groupName);
+
+            // Update leaderboard display
             updateLeaderboardTabs(gameState.syllables, gameState.groupName);
-            populateGroupDropdown(elements.groupSelect, gameState.groupName);
-            displayLeaderboard(gameState.syllables, gameState.groupName);
+            await populateGroupDropdown(elements.groupSelect, gameState.groupName);
+            await displayLeaderboard(gameState.syllables, gameState.groupName);
             showScreen('result');
         }
 
         // ==================== LEADERBOARD ====================
-        function saveScore(name, time, syllables, group) {
+        async function saveScore(name, time, syllables, group) {
+            if (!supabase) {
+                console.error('Supabase not configured - score not saved');
+                alert('Leaderboard ist nicht konfiguriert. Punktzahl konnte nicht gespeichert werden.');
+                return;
+            }
+
             try {
-                const key = `leaderboard_${syllables}`;
-                let leaderboard = [];
+                const { data, error } = await supabase
+                    .from('leaderboard')
+                    .insert([
+                        {
+                            name: name,
+                            time: time,
+                            syllables: syllables,
+                            group_name: group // null for "weltweit", or the group name
+                        }
+                    ]);
 
-                try {
-                    const stored = localStorage.getItem(key);
-                    if (stored) {
-                        leaderboard = JSON.parse(stored);
-                    }
-                } catch (e) {
-                    console.warn('Konnte gespeicherte Rangliste nicht laden:', e);
-                }
-
-                const newEntry = {
-                    name: name,
-                    time: time,
-                    date: new Date().toLocaleDateString('de-DE'),
-                    syllables: syllables,
-                    group: group || 'weltweit'
-                };
-
-                leaderboard.push(newEntry);
-                leaderboard.sort((a, b) => a.time - b.time);
-                // Don't limit here - we'll filter and limit when displaying
-
-                try {
-                    localStorage.setItem(key, JSON.stringify(leaderboard));
-                } catch (e) {
-                    console.warn('Konnte Rangliste nicht speichern:', e);
+                if (error) {
+                    console.error('Error saving score to Supabase:', error);
+                    alert('Punktzahl konnte nicht gespeichert werden. Bitte versuche es später erneut.');
+                } else {
+                    console.log('Score saved successfully');
                 }
             } catch (e) {
-                console.error('Fehler beim Speichern der Rangliste:', e);
+                console.error('Exception saving score:', e);
+                alert('Fehler beim Speichern der Punktzahl.');
             }
         }
 
-        function displayLeaderboard(syllables, group = 'weltweit') {
-            try {
-                const key = `leaderboard_${syllables}`;
-                let leaderboard = [];
+        async function displayLeaderboard(syllables, group = 'weltweit') {
+            if (!supabase) {
+                elements.leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Leaderboard nicht konfiguriert</td></tr>';
+                return;
+            }
 
-                try {
-                    const stored = localStorage.getItem(key);
-                    if (stored) {
-                        leaderboard = JSON.parse(stored);
-                    }
-                } catch (e) {
-                    console.warn('Konnte Rangliste nicht laden:', e);
+            try {
+                // Build query
+                let query = supabase
+                    .from('leaderboard')
+                    .select('*')
+                    .eq('syllables', syllables)
+                    .order('time', { ascending: true })
+                    .limit(5);
+
+                // Only filter by group if not "weltweit" (show all)
+                if (group !== 'weltweit') {
+                    query = query.eq('group_name', group);
                 }
 
-                // Filter by group and limit to top 5
-                const filteredLeaderboard = leaderboard
-                    .filter(entry => (entry.group || 'weltweit') === group)
-                    .slice(0, 5);
+                const { data, error } = await query;
+
+                if (error) {
+                    console.error('Error fetching leaderboard:', error);
+                    elements.leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Fehler beim Laden der Rangliste</td></tr>';
+                    return;
+                }
 
                 elements.leaderboardBody.innerHTML = '';
 
-                if (filteredLeaderboard.length === 0) {
+                if (!data || data.length === 0) {
                     elements.leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Noch keine Einträge</td></tr>';
                     return;
                 }
 
-                filteredLeaderboard.forEach((entry, index) => {
+                data.forEach((entry, index) => {
                     const row = document.createElement('tr');
                     const rankClass = index < 3 ? `rank-${index + 1}` : '';
+                    const date = new Date(entry.date).toLocaleDateString('de-DE');
 
                     row.innerHTML = `
                         <td class="rank ${rankClass}">${index + 1}.</td>
                         <td>${entry.name}</td>
                         <td><strong>${entry.time}s</strong></td>
-                        <td>${entry.date}</td>
+                        <td>${date}</td>
                     `;
 
                     elements.leaderboardBody.appendChild(row);
                 });
             } catch (e) {
-                console.error('Fehler beim Anzeigen der Rangliste:', e);
-                elements.leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Rangliste konnte nicht geladen werden</td></tr>';
+                console.error('Exception displaying leaderboard:', e);
+                elements.leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Fehler beim Anzeigen der Rangliste</td></tr>';
             }
         }
 
-        function displayLeaderboardView(syllables, group = 'weltweit') {
-            try {
-                const key = `leaderboard_${syllables}`;
-                let leaderboard = [];
+        async function displayLeaderboardView(syllables, group = 'weltweit') {
+            if (!supabase) {
+                elements.leaderboardViewBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Leaderboard nicht konfiguriert</td></tr>';
+                return;
+            }
 
-                try {
-                    const stored = localStorage.getItem(key);
-                    if (stored) {
-                        leaderboard = JSON.parse(stored);
-                    }
-                } catch (e) {
-                    console.warn('Konnte Rangliste nicht laden:', e);
+            try {
+                // Build query
+                let query = supabase
+                    .from('leaderboard')
+                    .select('*')
+                    .eq('syllables', syllables)
+                    .order('time', { ascending: true })
+                    .limit(5);
+
+                // Only filter by group if not "weltweit" (show all)
+                if (group !== 'weltweit') {
+                    query = query.eq('group_name', group);
                 }
 
-                // Filter by group and limit to top 5
-                const filteredLeaderboard = leaderboard
-                    .filter(entry => (entry.group || 'weltweit') === group)
-                    .slice(0, 5);
+                const { data, error } = await query;
+
+                if (error) {
+                    console.error('Error fetching leaderboard:', error);
+                    elements.leaderboardViewBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Fehler beim Laden der Rangliste</td></tr>';
+                    return;
+                }
 
                 elements.leaderboardViewBody.innerHTML = '';
 
-                if (filteredLeaderboard.length === 0) {
+                if (!data || data.length === 0) {
                     elements.leaderboardViewBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Noch keine Einträge</td></tr>';
                     return;
                 }
 
-                filteredLeaderboard.forEach((entry, index) => {
+                data.forEach((entry, index) => {
                     const row = document.createElement('tr');
                     const rankClass = index < 3 ? `rank-${index + 1}` : '';
+                    const date = new Date(entry.date).toLocaleDateString('de-DE');
 
                     row.innerHTML = `
                         <td class="rank ${rankClass}">${index + 1}.</td>
                         <td>${entry.name}</td>
                         <td><strong>${entry.time}s</strong></td>
-                        <td>${entry.date}</td>
+                        <td>${date}</td>
                     `;
 
                     elements.leaderboardViewBody.appendChild(row);
                 });
             } catch (e) {
-                console.error('Fehler beim Anzeigen der Rangliste:', e);
-                elements.leaderboardViewBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Rangliste konnte nicht geladen werden</td></tr>';
+                console.error('Exception displaying leaderboard:', e);
+                elements.leaderboardViewBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Fehler beim Anzeigen der Rangliste</td></tr>';
             }
         }
 
@@ -1298,31 +1345,31 @@
 
         // ==================== LEADERBOARD CONTROLS ====================
         // Result screen - syllable dropdown
-        elements.syllableSelect.addEventListener('change', () => {
+        elements.syllableSelect.addEventListener('change', async () => {
             const syllables = parseInt(elements.syllableSelect.value);
             currentLeaderboardSyllables = syllables;
-            displayLeaderboard(syllables, currentLeaderboardGroup);
+            await displayLeaderboard(syllables, currentLeaderboardGroup);
         });
 
         // Result screen - group dropdown
-        elements.groupSelect.addEventListener('change', () => {
+        elements.groupSelect.addEventListener('change', async () => {
             const group = elements.groupSelect.value;
             currentLeaderboardGroup = group;
-            displayLeaderboard(currentLeaderboardSyllables, group);
+            await displayLeaderboard(currentLeaderboardSyllables, group);
         });
 
         // Leaderboard view screen - syllable dropdown
-        elements.viewSyllableSelect.addEventListener('change', () => {
+        elements.viewSyllableSelect.addEventListener('change', async () => {
             const syllables = parseInt(elements.viewSyllableSelect.value);
             currentLeaderboardSyllables = syllables;
-            displayLeaderboardView(syllables, currentLeaderboardGroup);
+            await displayLeaderboardView(syllables, currentLeaderboardGroup);
         });
 
         // Leaderboard view screen - group dropdown
-        elements.viewGroupSelect.addEventListener('change', () => {
+        elements.viewGroupSelect.addEventListener('change', async () => {
             const group = elements.viewGroupSelect.value;
             currentLeaderboardGroup = group;
-            displayLeaderboardView(currentLeaderboardSyllables, group);
+            await displayLeaderboardView(currentLeaderboardSyllables, group);
         });
 
         function updateLeaderboardTabs(syllables, group = 'weltweit') {
