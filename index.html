@@ -38,7 +38,7 @@
         }
 
         body {
-            font-family: 'Playwrite DE Grund', cursive;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -202,6 +202,7 @@
         }
 
         .word {
+            font-family: 'Playwrite DE Grund', cursive;
             font-size: 4em;
             font-weight: bold;
             animation: wordPop 0.3s ease-out;
@@ -245,22 +246,49 @@
         /* Result Screen */
         .result-card {
             background: #f8f9fa;
-            padding: 30px;
+            padding: 25px;
             border-radius: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             text-align: center;
         }
 
         .result-title {
-            font-size: 2.5em;
+            font-size: 1.8em;
             color: #28a745;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .result-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .result-stat-item {
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .result-stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .result-stat-value {
+            font-size: 1.8em;
+            color: #667eea;
+            font-weight: bold;
         }
 
         .result-stats {
-            font-size: 1.5em;
+            font-size: 1.3em;
             color: #333;
-            margin: 15px 0;
+            margin: 10px 0;
         }
 
         .result-stats strong {
@@ -268,35 +296,36 @@
         }
 
         .leaderboard {
-            margin-top: 30px;
+            margin-top: 20px;
         }
 
         .leaderboard h2 {
             color: #667eea;
-            margin-bottom: 20px;
-            font-size: 2em;
+            margin-bottom: 15px;
+            font-size: 1.5em;
         }
 
         .leaderboard-table {
             width: 100%;
             border-collapse: collapse;
             background: white;
-            border-radius: 15px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
         }
 
         .leaderboard-table th {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 15px;
+            padding: 10px 12px;
             text-align: left;
-            font-size: 1.1em;
+            font-size: 0.95em;
         }
 
         .leaderboard-table td {
-            padding: 12px 15px;
+            padding: 10px 12px;
             border-bottom: 1px solid #eee;
+            font-size: 0.95em;
         }
 
         .leaderboard-table tr:last-child td {
@@ -321,21 +350,21 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             gap: 10px;
         }
 
         .syllable-select {
-            padding: 8px 12px;
-            font-size: 1em;
+            padding: 6px 10px;
+            font-size: 0.9em;
             font-weight: bold;
             border: 2px solid #667eea;
             background: white;
             color: #667eea;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
             outline: none;
-            min-width: 120px;
+            min-width: 100px;
         }
 
         .syllable-select:focus {
@@ -384,7 +413,7 @@
         .result-buttons {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 15px;
             margin-top: 20px;
         }
 
@@ -400,6 +429,13 @@
         .emoji {
             font-size: 1.2em;
             margin-right: 8px;
+        }
+
+        .start-secondary-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
         }
 
         /* Settings Screen */
@@ -499,7 +535,8 @@
 
             .game-buttons,
             .result-buttons,
-            .settings-buttons {
+            .settings-buttons,
+            .start-secondary-buttons {
                 grid-template-columns: 1fr;
             }
 
@@ -508,15 +545,23 @@
             }
 
             .result-title {
-                font-size: 2em;
+                font-size: 1.5em;
+            }
+
+            .result-stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .result-stat-value {
+                font-size: 1.5em;
             }
 
             .result-stats {
-                font-size: 1.2em;
+                font-size: 1.1em;
             }
 
             .leaderboard h2 {
-                font-size: 1.5em;
+                font-size: 1.3em;
             }
 
             .leaderboard-table {
@@ -539,19 +584,23 @@
             }
 
             .result-card {
-                padding: 20px;
+                padding: 15px;
             }
 
             .result-title {
-                font-size: 1.5em;
+                font-size: 1.3em;
+            }
+
+            .result-stat-value {
+                font-size: 1.3em;
             }
 
             .result-stats {
-                font-size: 1em;
+                font-size: 0.95em;
             }
 
             .leaderboard h2 {
-                font-size: 1.3em;
+                font-size: 1.2em;
             }
 
             .leaderboard-table {
@@ -586,53 +635,56 @@
                 <input type="text" id="playerName" placeholder="Gib deinen Namen ein..." maxlength="20">
             </div>
 
-            <div class="input-group">
-                <label for="groupName">Gruppe (optional):</label>
-                <input type="text" id="groupName" placeholder="z.B. Familie Schmidt, Klasse 5A..." maxlength="30">
-                <small style="color: #666; font-size: 0.9em; margin-top: 5px; display: block;">Leer lassen für weltweite Rangliste</small>
-            </div>
-
-            <div class="input-group">
-                <label>Wie viele Silben?</label>
-                <div class="syllable-buttons">
-                    <button class="syllable-btn" data-syllables="1">1</button>
-                    <button class="syllable-btn" data-syllables="2">2</button>
-                    <button class="syllable-btn" data-syllables="3">3</button>
-                    <button class="syllable-btn" data-syllables="4">4</button>
-                </div>
-            </div>
-
-            <div class="input-group">
-                <label>Spieltyp:</label>
-                <div class="game-type-buttons">
-                    <button class="game-type-btn" data-type="entziffern">
-                        Entziffern
-                        <small>Wort bleibt sichtbar</small>
-                    </button>
-                    <button class="game-type-btn" data-type="erkennen">
-                        Erkennen
-                        <small>Wort nur 1 Sekunde</small>
-                    </button>
-                </div>
+            <div class="input-group" style="margin-bottom: 30px;">
+                <label for="groupName" style="font-size: 0.95em; font-weight: normal; color: #666;">Gruppe (optional):</label>
+                <input type="text" id="groupName" placeholder="z.B. Familie Schmidt, Klasse 5A..." maxlength="30" style="border-color: #ddd;">
+                <small style="color: #999; font-size: 0.85em; margin-top: 5px; display: block;">Leer lassen für weltweite Rangliste</small>
             </div>
 
             <button class="btn btn-primary" id="startBtn" disabled>
                 <span class="emoji">🚀</span> START
             </button>
 
-            <button class="btn btn-secondary" id="settingsBtn" style="margin-top: 10px;">
-                <span class="emoji">⚙️</span> SCHWIERIGKEIT EINSTELLEN
-            </button>
-
-            <button class="btn btn-secondary" id="viewLeaderboardBtn" style="margin-top: 10px;">
-                <span class="emoji">🏆</span> RANGLISTE ANSEHEN
-            </button>
+            <div class="start-secondary-buttons">
+                <button class="btn btn-secondary" id="settingsBtn">
+                    <span class="emoji">⚙️</span> Einstellungen
+                </button>
+                <button class="btn btn-secondary" id="viewLeaderboardBtn">
+                    <span class="emoji">🏆</span> Rangliste
+                </button>
+            </div>
         </div>
 
         <!-- Settings Screen -->
         <div id="settingsScreen" class="screen">
-            <h2 style="color: #667eea; margin-bottom: 20px;">Schwierigkeit einstellen</h2>
-            <p style="margin-bottom: 20px; color: #666;">Wähle die Buchstaben und Kombinationen, die in den Wörtern vorkommen dürfen:</p>
+            <h2 style="color: #667eea; margin-bottom: 20px;">Einstellungen</h2>
+
+            <div class="input-group">
+                <label>Spieltyp:</label>
+                <div class="game-type-buttons">
+                    <button class="game-type-btn settings-game-type-btn" data-type="entziffern">
+                        Entziffern
+                        <small>Wort bleibt sichtbar</small>
+                    </button>
+                    <button class="game-type-btn settings-game-type-btn" data-type="erkennen">
+                        Erkennen
+                        <small>Wort nur 1 Sekunde</small>
+                    </button>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Wie viele Silben?</label>
+                <div class="syllable-buttons">
+                    <button class="syllable-btn settings-syllable-btn" data-syllables="1">1</button>
+                    <button class="syllable-btn settings-syllable-btn" data-syllables="2">2</button>
+                    <button class="syllable-btn settings-syllable-btn" data-syllables="3">3</button>
+                    <button class="syllable-btn settings-syllable-btn" data-syllables="4">4</button>
+                </div>
+            </div>
+
+            <h3 style="color: #667eea; margin: 30px 0 15px 0;">Buchstaben-Schwierigkeit</h3>
+            <p style="margin-bottom: 20px; color: #666; font-size: 0.95em;">Wähle die Buchstaben und Kombinationen, die in den Wörtern vorkommen dürfen:</p>
 
             <div class="settings-group">
                 <h3 class="settings-title">
@@ -800,20 +852,24 @@
         <!-- Result Screen -->
         <div id="resultScreen" class="screen">
             <div class="result-card">
-                <div class="result-title">🎉 Geschafft! 🎉</div>
-                <div class="result-stats">
-                    <span class="emoji">📖</span> <span id="wordsRead">0</span> von 10 Wörtern gelesen
+                <div class="result-title">🎉 Geschafft!</div>
+                <div class="result-stats-grid">
+                    <div class="result-stat-item">
+                        <div class="result-stat-label">📖 Gelesen</div>
+                        <div class="result-stat-value"><span id="wordsRead">0</span>/10</div>
+                    </div>
+                    <div class="result-stat-item">
+                        <div class="result-stat-label">⏱️ Zeit</div>
+                        <div class="result-stat-value"><span id="finalTime">0</span>s</div>
+                    </div>
                 </div>
-                <div class="result-stats">
-                    <span class="emoji">⏱️</span> Endzeit: <strong id="finalTime">0</strong> Sekunden
-                </div>
-                <div class="result-stats" id="penaltyInfo" style="color: #dc3545; font-size: 1.2em; display: none;">
-                    <span class="emoji">⚠️</span> +<span id="penaltySeconds">0</span>s Penalty
+                <div class="result-stats" id="penaltyInfo" style="color: #dc3545; font-size: 1.1em; display: none; margin-top: 10px;">
+                    <span class="emoji">⚠️</span> +<span id="penaltySeconds">0</span>s Strafe
                 </div>
             </div>
 
             <div class="leaderboard">
-                <h2>🏆 Top 5 Rangliste</h2>
+                <h2 style="font-size: 1.5em;">🏆 Rangliste</h2>
                 <div class="leaderboard-controls">
                     <select class="syllable-select" id="syllableSelect">
                         <option value="1">1 Silbe</option>
@@ -842,10 +898,10 @@
 
             <div class="result-buttons">
                 <button class="btn btn-secondary" id="newSettingsBtn">
-                    <span class="emoji">⚙️</span> NEUE EINSTELLUNGEN
+                    <span class="emoji">⚙️</span> Einstellungen
                 </button>
                 <button class="btn btn-primary" id="playAgainBtn">
-                    <span class="emoji">🔄</span> NOCHMAL SPIELEN
+                    <span class="emoji">🔄</span> Nochmal
                 </button>
             </div>
         </div>
@@ -993,7 +1049,16 @@
         });
 
         elements.saveSettingsBtn.addEventListener('click', () => {
-            saveLetterSettings();
+            // Check if syllables and game type are selected
+            const selectedSyllableBtn = document.querySelector('.settings-syllable-btn.selected');
+            const selectedGameTypeBtn = document.querySelector('.settings-game-type-btn.selected');
+
+            if (!selectedSyllableBtn || !selectedGameTypeBtn) {
+                alert('Bitte wähle die Silbenanzahl und den Spieltyp aus!');
+                return;
+            }
+
+            saveAllSettings();
             showScreen('start');
         });
 
@@ -1008,23 +1073,19 @@
             showScreen('start');
         });
 
-        // ==================== SYLLABLE SELECTION ====================
-        document.querySelectorAll('.syllable-btn').forEach(btn => {
+        // ==================== SYLLABLE SELECTION (Settings) ====================
+        document.querySelectorAll('.settings-syllable-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('.syllable-btn').forEach(b => b.classList.remove('selected'));
+                document.querySelectorAll('.settings-syllable-btn').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
-                gameState.syllables = parseInt(btn.dataset.syllables);
-                validateStartButton();
             });
         });
 
-        // ==================== GAME TYPE SELECTION ====================
-        document.querySelectorAll('.game-type-btn').forEach(btn => {
+        // ==================== GAME TYPE SELECTION (Settings) ====================
+        document.querySelectorAll('.settings-game-type-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('.game-type-btn').forEach(b => b.classList.remove('selected'));
+                document.querySelectorAll('.settings-game-type-btn').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
-                gameState.gameType = btn.dataset.type;
-                validateStartButton();
             });
         });
 
@@ -1038,9 +1099,7 @@
 
         function validateStartButton() {
             const nameValid = elements.playerName.value.trim().length > 0;
-            const syllablesValid = gameState.syllables !== null;
-            const gameTypeValid = gameState.gameType !== null;
-            elements.startBtn.disabled = !(nameValid && syllablesValid && gameTypeValid);
+            elements.startBtn.disabled = !nameValid;
         }
 
         // ==================== START GAME ====================
@@ -1052,6 +1111,18 @@
                 return;
             }
 
+            // Get settings from Settings page
+            const selectedSyllableBtn = document.querySelector('.settings-syllable-btn.selected');
+            const selectedGameTypeBtn = document.querySelector('.settings-game-type-btn.selected');
+
+            if (!selectedSyllableBtn || !selectedGameTypeBtn) {
+                alert('Bitte wähle zuerst in den Einstellungen die Silbenanzahl und den Spieltyp aus!');
+                showScreen('settings');
+                return;
+            }
+
+            gameState.syllables = parseInt(selectedSyllableBtn.dataset.syllables);
+            gameState.gameType = selectedGameTypeBtn.dataset.type;
             gameState.playerName = elements.playerName.value.trim();
             gameState.groupName = normalizeGroupName(elements.groupName.value);
 
@@ -1440,8 +1511,9 @@
             }
         }
 
-        function saveLetterSettings() {
-            const settings = {
+        function saveAllSettings() {
+            // Save letter settings
+            const letterSettings = {
                 basic: [],
                 extended: [],
                 umlauts: [],
@@ -1451,68 +1523,111 @@
             };
 
             document.querySelectorAll('#basicLetters input[type="checkbox"]:checked').forEach(cb => {
-                settings.basic.push(cb.value);
+                letterSettings.basic.push(cb.value);
             });
             document.querySelectorAll('#extendedLetters input[type="checkbox"]:checked').forEach(cb => {
-                settings.extended.push(cb.value);
+                letterSettings.extended.push(cb.value);
             });
             document.querySelectorAll('#umlautLetters input[type="checkbox"]:checked').forEach(cb => {
-                settings.umlauts.push(cb.value);
+                letterSettings.umlauts.push(cb.value);
             });
             document.querySelectorAll('#diphthongLetters input[type="checkbox"]:checked').forEach(cb => {
-                settings.diphthongs.push(cb.value);
+                letterSettings.diphthongs.push(cb.value);
             });
             document.querySelectorAll('#combinationLetters input[type="checkbox"]:checked').forEach(cb => {
-                settings.combinations.push(cb.value);
+                letterSettings.combinations.push(cb.value);
             });
             document.querySelectorAll('#specialLetters input[type="checkbox"]:checked').forEach(cb => {
-                settings.special.push(cb.value);
+                letterSettings.special.push(cb.value);
             });
 
+            // Save syllables and game type
+            const selectedSyllableBtn = document.querySelector('.settings-syllable-btn.selected');
+            const selectedGameTypeBtn = document.querySelector('.settings-game-type-btn.selected');
+
+            const gameSettings = {
+                syllables: selectedSyllableBtn ? parseInt(selectedSyllableBtn.dataset.syllables) : null,
+                gameType: selectedGameTypeBtn ? selectedGameTypeBtn.dataset.type : null
+            };
+
             try {
-                localStorage.setItem('letterSettings', JSON.stringify(settings));
-                console.log('Buchstaben-Einstellungen gespeichert:', settings);
+                localStorage.setItem('letterSettings', JSON.stringify(letterSettings));
+                localStorage.setItem('gameSettings', JSON.stringify(gameSettings));
+                console.log('Alle Einstellungen gespeichert:', { letterSettings, gameSettings });
             } catch (e) {
                 console.warn('Konnte Einstellungen nicht speichern:', e);
             }
         }
 
-        function loadLetterSettings() {
+        function loadAllSettings() {
+            // Load letter settings
             try {
                 const stored = localStorage.getItem('letterSettings');
-                if (!stored) return;
+                if (stored) {
+                    const settings = JSON.parse(stored);
 
-                const settings = JSON.parse(stored);
+                    // Uncheck all first
+                    document.querySelectorAll('.letter-checkbox input[type="checkbox"]').forEach(cb => {
+                        cb.checked = false;
+                    });
 
-                // Uncheck all first
-                document.querySelectorAll('.letter-checkbox input[type="checkbox"]').forEach(cb => {
-                    cb.checked = false;
-                });
+                    // Check stored settings
+                    const allSettings = [
+                        ...settings.basic,
+                        ...settings.extended,
+                        ...settings.umlauts,
+                        ...settings.diphthongs,
+                        ...settings.combinations,
+                        ...settings.special
+                    ];
 
-                // Check stored settings
-                const allSettings = [
-                    ...settings.basic,
-                    ...settings.extended,
-                    ...settings.umlauts,
-                    ...settings.diphthongs,
-                    ...settings.combinations,
-                    ...settings.special
-                ];
+                    document.querySelectorAll('.letter-checkbox input[type="checkbox"]').forEach(cb => {
+                        if (allSettings.includes(cb.value)) {
+                            cb.checked = true;
+                        }
+                    });
 
-                document.querySelectorAll('.letter-checkbox input[type="checkbox"]').forEach(cb => {
-                    if (allSettings.includes(cb.value)) {
-                        cb.checked = true;
-                    }
-                });
+                    // Update group checkboxes
+                    document.querySelectorAll('.letter-grid').forEach(grid => {
+                        updateGroupCheckbox(grid);
+                    });
 
-                // Update group checkboxes
-                document.querySelectorAll('.letter-grid').forEach(grid => {
-                    updateGroupCheckbox(grid);
-                });
-
-                console.log('Buchstaben-Einstellungen geladen:', settings);
+                    console.log('Buchstaben-Einstellungen geladen:', settings);
+                }
             } catch (e) {
-                console.warn('Konnte Einstellungen nicht laden:', e);
+                console.warn('Konnte Buchstaben-Einstellungen nicht laden:', e);
+            }
+
+            // Load game settings (syllables and game type)
+            try {
+                const storedGame = localStorage.getItem('gameSettings');
+                if (storedGame) {
+                    const gameSettings = JSON.parse(storedGame);
+
+                    // Set syllables
+                    if (gameSettings.syllables) {
+                        document.querySelectorAll('.settings-syllable-btn').forEach(btn => {
+                            btn.classList.remove('selected');
+                            if (parseInt(btn.dataset.syllables) === gameSettings.syllables) {
+                                btn.classList.add('selected');
+                            }
+                        });
+                    }
+
+                    // Set game type
+                    if (gameSettings.gameType) {
+                        document.querySelectorAll('.settings-game-type-btn').forEach(btn => {
+                            btn.classList.remove('selected');
+                            if (btn.dataset.type === gameSettings.gameType) {
+                                btn.classList.add('selected');
+                            }
+                        });
+                    }
+
+                    console.log('Spiel-Einstellungen geladen:', gameSettings);
+                }
+            } catch (e) {
+                console.warn('Konnte Spiel-Einstellungen nicht laden:', e);
             }
         }
 
@@ -1602,8 +1717,8 @@
                 console.log('LocalStorage verfügbar - Ranglisten werden gespeichert.');
             }
 
-            // Load letter settings
-            loadLetterSettings();
+            // Load all settings
+            loadAllSettings();
 
             // Load last used group name
             try {
