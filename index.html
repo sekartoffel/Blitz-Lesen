@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blitz Lesen</title>
-    
+
+    <!-- Cache Busting Meta Tags -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <!-- PWA Meta Tags -->
     <meta name="description" content="Spielerisches Lesetraining für Grundschulkinder mit 400 deutschen Wörtern">
     <meta name="theme-color" content="#667eea">
@@ -66,6 +71,74 @@
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+
+        /* Update Notification Banner */
+        .update-banner {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 10000;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .update-banner.visible {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .update-banner-content {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .update-banner-message {
+            font-size: 1.1em;
+            font-weight: bold;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .update-banner-button {
+            background: white;
+            color: #28a745;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .update-banner-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .update-banner-button:active {
+            transform: translateY(0);
         }
 
         h1 {
@@ -625,6 +698,18 @@
     </style>
 </head>
 <body>
+    <!-- Update Notification Banner -->
+    <div id="updateBanner" class="update-banner">
+        <div class="update-banner-content">
+            <div class="update-banner-message">
+                ⚡ Eine neue Version ist verfügbar!
+            </div>
+            <button id="updateButton" class="update-banner-button">
+                Jetzt aktualisieren
+            </button>
+        </div>
+    </div>
+
     <div class="container">
         <h1>⚡ Blitz Lesen ⚡</h1>
 
@@ -1731,18 +1816,101 @@
                 console.warn('Konnte letzte Gruppe nicht laden:', e);
             }
 
-            // Register Service Worker for PWA
+            // ==================== SERVICE WORKER & UPDATE DETECTION ====================
+            let newWorker = null;
+
+            // Register Service Worker for PWA with update detection
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('./service-worker.js')
-                        .then((registration) => {
-                            console.log('✅ Service Worker registriert:', registration.scope);
-                        })
-                        .catch((error) => {
-                            console.log('❌ Service Worker Registrierung fehlgeschlagen:', error);
-                        });
+                    registerServiceWorker();
+
+                    // Check for updates every hour
+                    setInterval(() => {
+                        console.log('[App] Checking for updates...');
+                        checkForUpdates();
+                    }, 60 * 60 * 1000); // 1 hour
+                });
+
+                // Handle controllerchange event to reload automatically after update
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    console.log('[App] New service worker activated, reloading page...');
+                    window.location.reload();
                 });
             }
+
+            function registerServiceWorker() {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then((registration) => {
+                        console.log('[App] Service Worker registered:', registration.scope);
+
+                        // Check for updates on registration
+                        registration.addEventListener('updatefound', () => {
+                            console.log('[App] New service worker installing...');
+                            newWorker = registration.installing;
+
+                            newWorker.addEventListener('statechange', () => {
+                                console.log('[App] Service worker state:', newWorker.state);
+
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New service worker available, show update banner
+                                    console.log('[App] New version available!');
+                                    showUpdateBanner();
+                                }
+                            });
+                        });
+
+                        // Check for updates immediately
+                        checkForUpdates();
+                    })
+                    .catch((error) => {
+                        console.error('[App] Service Worker registration failed:', error);
+                    });
+            }
+
+            function checkForUpdates() {
+                navigator.serviceWorker.getRegistration()
+                    .then((registration) => {
+                        if (registration) {
+                            registration.update();
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('[App] Error checking for updates:', error);
+                    });
+            }
+
+            function showUpdateBanner() {
+                const banner = document.getElementById('updateBanner');
+                if (banner) {
+                    banner.classList.add('visible');
+                }
+            }
+
+            function hideUpdateBanner() {
+                const banner = document.getElementById('updateBanner');
+                if (banner) {
+                    banner.classList.remove('visible');
+                }
+            }
+
+            // Handle update button click
+            document.getElementById('updateButton').addEventListener('click', () => {
+                console.log('[App] User clicked update button');
+
+                if (newWorker) {
+                    // Send SKIP_WAITING message to the new service worker
+                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+
+                    // Hide the banner
+                    hideUpdateBanner();
+
+                    // The page will reload automatically via controllerchange event
+                } else {
+                    // Fallback: just reload
+                    console.log('[App] No new worker found, reloading page...');
+                    window.location.reload();
+                }
+            });
 
             console.log('✅ App bereit!');
         })();
