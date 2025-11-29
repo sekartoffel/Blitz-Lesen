@@ -1,7 +1,16 @@
 // ==================== VERSION CONTROL ====================
-// Increment this version number when you want to force an update
-const CACHE_VERSION = 2;
-const CACHE_NAME = `blitz-lesen-v${CACHE_VERSION}`;
+//
+// WHEN TO UPDATE THE VERSION:
+// - For major updates (CSS/JS changes) that should clear the cache
+// - Run ./update-version.sh to auto-generate a new timestamp version
+//
+// WHEN YOU DON'T NEED TO UPDATE:
+// - Minor HTML changes (network-first strategy handles this automatically)
+// - Any change to this file triggers a service worker update anyway
+// - Small text or content updates
+//
+const CACHE_VERSION = '2025-01-29-v1';
+const CACHE_NAME = `blitz-lesen-${CACHE_VERSION}`;
 
 const urlsToCache = [
   './',
