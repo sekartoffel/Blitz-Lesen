@@ -9,7 +9,7 @@
 // - Any change to this file triggers a service worker update anyway
 // - Small text or content updates
 //
-const CACHE_VERSION = '2025-01-29-v1';
+const CACHE_VERSION = '2026-01-04-134905';
 const CACHE_NAME = `blitz-lesen-${CACHE_VERSION}`;
 
 const urlsToCache = [
@@ -32,9 +32,8 @@ self.addEventListener('install', (event) => {
         return cache.addAll(urlsToCache);
       })
       .then(() => {
-        console.log('[Service Worker] Install complete');
-        // Force the waiting service worker to become the active service worker
-        return self.skipWaiting();
+        console.log('[Service Worker] Install complete - waiting for user activation');
+        // Don't auto-skip waiting - let the user decide when to update via the update banner
       })
   );
 });
