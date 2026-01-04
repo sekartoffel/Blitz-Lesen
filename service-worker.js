@@ -78,6 +78,11 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
+  // Skip non-HTTP(S) requests (chrome-extension, file, etc.)
+  if (!url.protocol.startsWith('http')) {
+    return;
+  }
+
   // For HTML files (navigation requests), use network-first to ensure fresh content
   if (request.mode === 'navigate' || request.destination === 'document' ||
       url.pathname.endsWith('.html') || url.pathname === '/' || url.pathname === './') {

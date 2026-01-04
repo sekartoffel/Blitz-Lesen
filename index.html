@@ -998,9 +998,9 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJoa2ZtcGVobXpqeGdyZGRlaW9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4OTgwMTcsImV4cCI6MjA3OTQ3NDAxN30.F_k7W11EgsOS4_Z1Y3bOBgftUUV-89adBO0AnBks_vc';
 
         // Initialize Supabase client
-        let supabase = null;
+        let supabaseClient = null;
         if (typeof window.supabase !== 'undefined' && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             console.log('✅ Supabase initialized');
         } else {
             console.warn('⚠️ Supabase not configured - leaderboard features will not work');
@@ -1078,14 +1078,14 @@
         async function getAllGroups() {
             const groups = new Set(['weltweit']);
 
-            if (!supabase) {
+            if (!supabaseClient) {
                 console.warn('Supabase not configured');
                 return Array.from(groups).sort();
             }
 
             try {
                 // Get distinct group names from Supabase
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('leaderboard')
                     .select('group_name')
                     .not('group_name', 'is', null);
@@ -1349,14 +1349,14 @@
 
         // ==================== LEADERBOARD ====================
         async function saveScore(name, time, syllables, group, wordsRead, wordsSkipped, gameType) {
-            if (!supabase) {
+            if (!supabaseClient) {
                 console.error('Supabase not configured - score not saved');
                 alert('Leaderboard ist nicht konfiguriert. Punktzahl konnte nicht gespeichert werden.');
                 return;
             }
 
             try {
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('leaderboard')
                     .insert([
                         {
@@ -1383,14 +1383,14 @@
         }
 
         async function displayLeaderboard(syllables, group = 'weltweit') {
-            if (!supabase) {
+            if (!supabaseClient) {
                 elements.leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Leaderboard nicht konfiguriert</td></tr>';
                 return;
             }
 
             try {
                 // Build query
-                let query = supabase
+                let query = supabaseClient
                     .from('leaderboard')
                     .select('*')
                     .eq('syllables', syllables)
@@ -1438,14 +1438,14 @@
         }
 
         async function displayLeaderboardView(syllables, group = 'weltweit') {
-            if (!supabase) {
+            if (!supabaseClient) {
                 elements.leaderboardViewBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Leaderboard nicht konfiguriert</td></tr>';
                 return;
             }
 
             try {
                 // Build query
-                let query = supabase
+                let query = supabaseClient
                     .from('leaderboard')
                     .select('*')
                     .eq('syllables', syllables)
