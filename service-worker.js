@@ -9,7 +9,7 @@
 // - Any change to this file triggers a service worker update anyway
 // - Small text or content updates
 //
-const CACHE_VERSION = '2026-01-04-134905';
+const CACHE_VERSION = '2026-01-04-145431';
 const CACHE_NAME = `blitz-lesen-${CACHE_VERSION}`;
 
 const urlsToCache = [
@@ -77,6 +77,11 @@ self.addEventListener('message', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
+
+  // Skip non-HTTP(S) requests (chrome-extension, file, etc.)
+  if (!url.protocol.startsWith('http')) {
+    return;
+  }
 
   // For HTML files (navigation requests), use network-first to ensure fresh content
   if (request.mode === 'navigate' || request.destination === 'document' ||
