@@ -1821,7 +1821,33 @@
 
             // Register Service Worker for PWA with update detection
             if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
+                window.addEventListener('load', async () => {
+                    // EMERGENCY FIX: Unregister buggy service workers from old deployment
+                    try {
+                        const registrations = await navigator.serviceWorker.getRegistrations();
+                        for (const registration of registrations) {
+                            // Check if this is an old buggy version
+                            const oldCacheNames = await caches.keys();
+                            const hasBuggyCache = oldCacheNames.some(name =>
+                                name.includes('v2') || name.includes('2025-01-29')
+                            );
+
+                            if (hasBuggyCache) {
+                                console.log('[App] 🔧 Removing buggy service worker and caches...');
+                                await registration.unregister();
+                                for (const cacheName of oldCacheNames) {
+                                    await caches.delete(cacheName);
+                                    console.log('[App] ❌ Deleted old cache:', cacheName);
+                                }
+                                console.log('[App] ✅ Old service worker removed, reloading...');
+                                window.location.reload();
+                                return;
+                            }
+                        }
+                    } catch (e) {
+                        console.error('[App] Error checking for old service worker:', e);
+                    }
+
                     registerServiceWorker();
 
                     // Check for updates every hour
