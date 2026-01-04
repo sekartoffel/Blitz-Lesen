@@ -9,7 +9,7 @@
 // - Any change to this file triggers a service worker update anyway
 // - Small text or content updates
 //
-const CACHE_VERSION = '2026-01-04-134905';
+const CACHE_VERSION = '2026-01-04-145431';
 const CACHE_NAME = `blitz-lesen-${CACHE_VERSION}`;
 
 const urlsToCache = [
